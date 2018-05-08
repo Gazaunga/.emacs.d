@@ -47,21 +47,12 @@
 (eval-when-compile
   (require 'use-package))
 
-;; always comnnpile packages, and use the newest version available.
-(use-package auto-compile
-  :diminish auto-compile-mode
-  :config
-  (auto-compile-on-load-mode)
-  (setq load-prefer-newer t))
-
 ;; ORG and main configurations
 
 (use-package org
   :ensure org-plus-contrib
-  :pin org)
-
-(org-babel-load-file (concat user-emacs-directory "README.org"))
-
+  :pin org
+  :config (org-babel-load-file (concat user-emacs-directory "README.org")))
 
 ;; [CUSTOM]
 
