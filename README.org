@@ -60,6 +60,9 @@ A non-free program is a yoke, an instrument of unjust power.
       ;; auto-save-file-name-transforms '((".*" "~/.emacs.d/configs/auto-save-list/"
       ;; t))   ;;transform backups file name
       dired-recursive-deletes (quote top)         ;; “top” means ask once
+      dired-dwim-target t
+      dired-recursive-deletes t                   ;; Dired can delete nonempty directories including all their contents
+      dired-hide-details-mode t
       eldoc-idle-delay 0.1                        ;; eldoc-mode
       eldoc-echo-area-use-multiline-p nil         ;; eldoc-mode
       ;; text-scale-mode-step 0.8
@@ -83,8 +86,6 @@ A non-free program is a yoke, an instrument of unjust power.
       apropos-sort-by-scores t                    ;; sort results by relevancy
       ediff-diff-options "-w"                     ;; A saner ediff
       delete-by-moving-to-trash t                 ;; affected files or directories into the operating system's Trash, instead of deleting them outright
-      dire-recursive-deletes t                   ;; Dired can delete nonempty directories including all their contents
-      dired-hide-details-mode t
       ediff-split-window-function 'split-window-horizontally
       ediff-window-setup-function 'ediff-setup-windows-plain
       ;; split-width-threshold nil                   ;; never split the window (nice for rtags and compile errors).
@@ -103,10 +104,10 @@ A non-free program is a yoke, an instrument of unjust power.
 
 #+end_src
 
-** setq-default variables
+** setq-default
 #+begin_src emacs-lisp :tangle yes
   (setq-default  indent-tabs-mode nil                ;; use space to indent by default
-                 ;; dired-listing-switches "-laGh1v --group-directories-first"       ;; Add file sizes in human-readable units (KB, MB, etc) to dired buffers.
+                 dired-listing-switches "-laGh1v --group-directories-first"       ;; Add file sizes in human-readable units (KB, MB, etc) to dired buffers.
                  ;; tab-width 4                         ;; set appearance of a tab that is represented by 4 spaces
 
                  ;; fill-column 80                      ;; Set the default line length to LINE-LENGTH.
@@ -188,6 +189,7 @@ A non-free program is a yoke, an instrument of unjust power.
 ;; (remove-hook 'minibuffer-setup-hook 'winner-save-unconditionally)
 
 #+END_SRC
+
 ** Hooks
 #+begin_src emacs-lisp :tangle yes
 
@@ -206,6 +208,9 @@ A non-free program is a yoke, an instrument of unjust power.
 #+RESULTS:
 : t
 
+** defadvice
+#+begin_src emacs-lisp :tangle yes
+#+end_src
 
 * Built-in packages
   It is somewhat surprising the amount of built-in packages are bundled with emacs. Lets enhance them!
@@ -308,35 +313,43 @@ A non-free program is a yoke, an instrument of unjust power.
 
 ** Dired
 #+begin_src emacs-lisp :tangle yes
-  (use-package dired-atool
-    :defer 2
-    :diminish
-    :init (dired-atool-setup)
-    :config
-    (define-key dired-mode-map "z" #'dired-atool-do-unpack)
-    (define-key dired-mode-map "Z" #'dired-atool-do-pack))
+(use-package dired-atool
+  :defer 2
+  :diminish
+  :init (dired-atool-setup)
+  :config
+  (define-key dired-mode-map "z" #'dired-atool-do-unpack)
+  (define-key dired-mode-map "Z" #'dired-atool-do-pack))
 
-  (use-package dired-k
-    :defer 2
-    :diminish
-    :config
-    (progn
-      (add-hook 'dired-initial-position-hook 'dired-k)))
+(use-package dired-k
+  :defer 2
+  :diminish
+  :config
+  (progn
+    (add-hook 'dired-initial-position-hook 'dired-k)))
 
-  (use-package dired-hacks-utils
-    :defer 2
-    :diminish
-    :config
-    (setq dired-open-extensions
-          '(("pdf" . "firefox")
-                                          ;("ogg" . "mpv")
-            ("ogv" . "mpv")
-            ("mkv" . "mpv")
-            ("mp4" . "mpv")
-            ("avi" . "mpv"))))
+(use-package dired-hacks-utils
+  :defer 2
+  :diminish
+  :config
+  (setq dired-collapse-mode t
+        dired-open-extensions
+        '(("pdf" . "firefox")
+                                        ;("ogg" . "mpv")
+          ("ogv" . "mpv")
+          ("mkv" . "mpv")
+          ("mp4" . "mpv")
+          ("avi" . "mpv"))))
 
-  ;; (use-package stripe-buffer              ; Add stripes to a buffer
-  ;;   :init (add-hook 'dired-mode-hook #'stripe-buffer-mode))
+(use-package dired-collapse
+  :config
+  (setq dired-collapse-mode t))
+
+(use-package dired-quick-sort
+  :config (dired-quick-sort-setup))
+
+;; (use-package stripe-buffer              ; Add stripes to a buffer
+;;   :init (add-hook 'dired-mode-hook #'stripe-buffer-mode))
 
 #+end_src
 
@@ -403,13 +416,25 @@ A non-free program is a yoke, an instrument of unjust power.
 
 
 * Keybindings (Ctrl-C)
-** Whick-key
+** Keybind packages
 #+begin_src emacs-lisp :tangle yes
 (use-package which-key
   :diminish which-key-mode
   :commands which-key-mode
   :init
   (which-key-mode))
+
+(use-package hydra
+  :config
+  (defhydra hydra-launcher (:color blue)
+    "Launch"
+    ("h" man "man")
+    ("r" (browse-url "http://www.reddit.com/r/emacs/") "reddit")
+    ("w" (browse-url "http://www.emacswiki.org/") "emacswiki")
+    ("s" shell "shell")
+    ("q" nil "cancel"))
+  (global-set-key (kbd "C-M-z r") 'hydra-launcher/body))
+
 #+end_src
 
 ** Prefixes
@@ -420,24 +445,24 @@ A non-free program is a yoke, an instrument of unjust power.
             (define-prefix-command (cdr entry))
             (bind-key (car entry) (cdr entry)))
         '(
-          ("C-c b" . Bultin)
-          ("C-c @" . Hs)
-          ("C-c x d" . DefineWord)
-          ("C-c d" . Devel)
-          ("C-c g" . Goto-last)
-          ("C-c g" . Goto-last)
-          ("C-c e" . Move-text)
-          ("C-c s" . Smartparens)
-          ;; ("C-c S" . Spell)
-          ("C-c x" . Apps)
-          ("C-c x e" . Emms)
-          ("C-c o" . OraFunctions)
-          ("C-c f" . CustomDefun)
-          ("C-c y" . Yasnippet)
-          ("C-c h" . Hydra)
-          ("C-c u" . Url)
-          ("C-c t" . Tools)
-          ("C-c t d" . Dumb-Jump)
+          ("C-M-z b" . Bultin)
+          ("C-M-z @" . Hs)
+          ("C-M-z x d" . DefineWord)
+          ("C-M-z d" . Devel)
+          ("C-M-z g" . Goto-last)
+          ("C-M-z g" . Goto-last)
+          ("C-M-z e" . Move-text)
+          ("C-M-z s" . Smartparens)
+          ;; ("C-M-z S" . Spell)
+          ("C-M-z x" . Apps)
+          ("C-M-z x e" . Emms)
+          ("C-M-z o" . OraFunctions)
+          ("C-M-z f" . CustomDefun)
+          ("C-M-z y" . Yasnippet)
+          ("C-M-z h" . Hydra)
+          ("C-M-z u" . Url)
+          ("C-M-z t" . Tools)
+          ("C-M-z t d" . Dumb-Jump)
           ;; ("C-,"   . my-ctrl-comma-map)
           ;; ("<C-m>" . my-ctrl-m-map)
           )))
@@ -447,18 +472,18 @@ A non-free program is a yoke, an instrument of unjust power.
 #+BEGIN_SRC emacs-lisp :tangle yes
 (bind-keys
  ;; Bultin
- ("C-c b a" . ansi-term)
- ("C-c b s" . shell)
- ("C-c b e" . eshell)
- ("C-c b v" . eval-buffer)
- ("C-c b k" . kill-buffer-and-window)
+ ("C-M-z b a" . ansi-term)
+ ("C-M-z b s" . shell)
+ ("C-M-z b e" . eshell)
+ ("C-M-z b v" . eval-buffer)
+ ("C-M-z b k" . kill-buffer-and-window)
  ("C-x K" . kill-this-buffer)
 
  ;; Custom defuns
- ("C-c f d" . xah-delete-current-file-make-backup)
+ ("C-M-z f d" . xah-delete-current-file-make-backup)
 
  ;; Orafunctions
- ("C-c o w" . ora-open-wikipedia)
+ ("C-M-z o w" . ora-open-wikipedia)
 
  ;; use hippie-expand instead of dabbrev
  ("M-/" . hippie-expand)
@@ -469,10 +494,10 @@ A non-free program is a yoke, an instrument of unjust power.
 ;; (define-key dired-mode-map (kbd "^") (lambda () (interactive) (find-alternate-file "..")))  ; was dired-up-directory
 
 ;; Moving through windows
-;; (global-set-key (kbd "C-c w p") 'windmove-up)
-;; (global-set-key (kbd "C-c w n") 'windmove-down)
-;; (global-set-key (kbd "C-c w f") 'windmove-right)
-;; (global-set-key (kbd "C-c w b") 'windmove-left)
+;; (global-set-key (kbd "C-M-z w p") 'windmove-up)
+;; (global-set-key (kbd "C-M-z w n") 'windmove-down)
+;; (global-set-key (kbd "C-M-z w f") 'windmove-right)
+;; (global-set-key (kbd "C-M-z w b") 'windmove-left)
 #+END_SRC
 
 
@@ -834,7 +859,7 @@ A non-free program is a yoke, an instrument of unjust power.
   ;; The following example demonstrates how to set a key binding only available
   ;; in line mode. It's simply done by first push the prefix key to
   ;; ;; `exwm-input-prefix-keys' and then add the key sequence to `exwm-mode-map'.
-  ;; ;; The example shorten 'C-c q' to 'C-q'.
+  ;; ;; The example shorten 'C-M-z q' to 'C-q'.
   ;; (push ?\C-q exwm-input-prefix-keys)
   ;; (define-key exwm-mode-map [?\C-q] 'exwm-input-send-next-key)
   ;; ;; M-m leader, sorry Space Folks
@@ -853,9 +878,9 @@ A non-free program is a yoke, an instrument of unjust power.
   ;; (push ?\C-7 exwm-input-prefix-keys)
   ;; (push ?\C-8 exwm-input-prefix-keys)
   ;; (push ?\C-9 exwm-input-prefix-keys)
-  ;; ;; C-c, C-x are needed for copying and pasting
+  ;; ;; C-M-z, C-x are needed for copying and pasting
   ;; (delete ?\C-x exwm-input-prefix-keys)
-  ;; (delete ?\C-c exwm-input-prefix-keys)
+  ;; (delete ?\C-M-z exwm-input-prefix-keys)
   ;; ;; We can use `M-m h' to access help
   ;; (delete ?\C-h exwm-input-prefix-keys)
 
@@ -877,7 +902,7 @@ A non-free program is a yoke, an instrument of unjust power.
           company-minimum-prefix-length 2
           company-tooltip-limit 20)
     :bind
-    ("C-c y c" . company-files))
+    ("C-M-z y c" . company-files))
 
   (use-package company-quickhelp
     :diminish company-quickhelp-mode
@@ -887,7 +912,7 @@ A non-free program is a yoke, an instrument of unjust power.
 
   (with-eval-after-load 'company
     (company-quickhelp-mode)
-    (define-key company-active-map (kbd "C-c c q") #'company-quickhelp-manual-begin))
+    (define-key company-active-map (kbd "C-M-z c q") #'company-quickhelp-manual-begin))
 
   (use-package company-shell
     :diminish company-shell-modes
@@ -957,7 +982,7 @@ A non-free program is a yoke, an instrument of unjust power.
   (use-package yasnippet
     :diminish yas-minor-mode
     :bind
-    ("C-c y y" . yas-expand)
+    ("C-M-z y y" . yas-expand)
     (:map yas-minor-mode-map
           ("TAB" . nil)
           ("<tab>" . nil))
@@ -990,9 +1015,9 @@ A non-free program is a yoke, an instrument of unjust power.
     :defer 2
     :after yasnippet
     :commands (aya-create aya-open-line)
-    :bind (("C-c y a" . aya-create)
-           ("C-c y e" . aya-expand)
-           ("C-c y o" . aya-open-line)))
+    :bind (("C-M-z y a" . aya-create)
+           ("C-M-z y e" . aya-expand)
+           ("C-M-z y o" . aya-open-line)))
 #+end_src
 
 
@@ -1090,36 +1115,36 @@ A non-free program is a yoke, an instrument of unjust power.
       (progn
         (show-smartparens-global-mode t))
       :bind
-      ("C-c s f o" . sp-forward-sexp)
-      ("C-c s B" . sp-backward-sexp)
-      ("C-c s b u" . sp-backward-up-sexp)
-      ("C-c s b d" . sp-backward-down-sexp)
-      ("C-c s b e" . sp-beginning-of-sexp)
-      ("C-c s e n" . sp-end-of-sexp)
-      ("C-c s d o" . sp-down-sexp)
-      ("C-c s u p" . sp-up-sexp)
-      ("C-c s n" . sp-next-sexp)
-      ("C-c s p" . sp-previous-sexp)
-      ("C-c s k" . sp-kill-sexp)
-      ("C-c s c" . sp-copy-sexp)
-      ("C-c s u n" . sp-unwrap-sexp)
-      ("C-c s u b" . sp-backward-unwrap-sexp)
-      ("C-c s f s" . sp-forward-slurp-sexp)
-      ("C-c s f b" . sp-forward-barf-sexp)
-      ("C-c s b s" . sp-backward-slurp-sexp)
-      ("C-c s b b" . sp-backward-barf-sexp)
-      ("C-c s s p" . sp-splice-sexp)
-      ("C-c s s b" . sp-splice-sexp-killing-backward)
-      ("C-c s s k" . sp-splice-sexp-killing-around)
-      ("C-c s s n e" . sp-select-next-thing-exchange)
-      ("C-c s s n t" . sp-select-next-thing)
-      ("C-c s m" . sp-mark-sexp)
-      ("C-c s f S" . sp-forward-symbol)
-      ("C-c s b S" . sp-backward-symbol))
+      ("C-M-z s f o" . sp-forward-sexp)
+      ("C-M-z s B" . sp-backward-sexp)
+      ("C-M-z s b u" . sp-backward-up-sexp)
+      ("C-M-z s b d" . sp-backward-down-sexp)
+      ("C-M-z s b e" . sp-beginning-of-sexp)
+      ("C-M-z s e n" . sp-end-of-sexp)
+      ("C-M-z s d o" . sp-down-sexp)
+      ("C-M-z s u p" . sp-up-sexp)
+      ("C-M-z s n" . sp-next-sexp)
+      ("C-M-z s p" . sp-previous-sexp)
+      ("C-M-z s k" . sp-kill-sexp)
+      ("C-M-z s c" . sp-copy-sexp)
+      ("C-M-z s u n" . sp-unwrap-sexp)
+      ("C-M-z s u b" . sp-backward-unwrap-sexp)
+      ("C-M-z s f s" . sp-forward-slurp-sexp)
+      ("C-M-z s f b" . sp-forward-barf-sexp)
+      ("C-M-z s b s" . sp-backward-slurp-sexp)
+      ("C-M-z s b b" . sp-backward-barf-sexp)
+      ("C-M-z s s p" . sp-splice-sexp)
+      ("C-M-z s s b" . sp-splice-sexp-killing-backward)
+      ("C-M-z s s k" . sp-splice-sexp-killing-around)
+      ("C-M-z s s n e" . sp-select-next-thing-exchange)
+      ("C-M-z s s n t" . sp-select-next-thing)
+      ("C-M-z s m" . sp-mark-sexp)
+      ("C-M-z s f S" . sp-forward-symbol)
+      ("C-M-z s b S" . sp-backward-symbol))
 
     (use-package emacs-surround
       :ensure nil
-      :bind ("C-c d q" . emacs-surround))
+      :bind ("C-M-z d q" . emacs-surround))
 
     (use-package rainbow-delimiters
       :diminish rainbow-delimiters-mode
@@ -1172,8 +1197,8 @@ A non-free program is a yoke, an instrument of unjust power.
 
   (use-package move-text
     :bind
-    ("C-c d m u" . move-text-bup)
-    ("C-c d m d" . move-text-down))
+    ("C-M-z d m u" . move-text-bup)
+    ("C-M-z d m d" . move-text-down))
 
   (use-package anzu
     :diminish anzu-mode
@@ -1184,15 +1209,15 @@ A non-free program is a yoke, an instrument of unjust power.
 
   (use-package goto-chg
     :bind
-    ("C-c d g a" . goto-last-change)
-    ("C-c d g r" . goto-last-change-reverse))
+    ("C-M-z d g a" . goto-last-change)
+    ("C-M-z d g r" . goto-last-change-reverse))
 
   ;; (use-package origami
   ;;   :diminish origami-mode
   ;;   :after (dash s)
   ;;   :commands global-origami-mode
   ;;   :init (global-origami-mode t)
-  ;;   :bind ("C-c d o" . origami-toggle-node))
+  ;;   :bind ("C-M-z d o" . origami-toggle-node))
 
   ;; (use-package vimish-fold
   ;;   :defer 1
@@ -1226,7 +1251,7 @@ A non-free program is a yoke, an instrument of unjust power.
     ("C-=" . er/expand-region))
 
   (use-package mark-multiple
-    :bind ("C-c d n" . 'mark-next-like-this))
+    :bind ("C-M-z d n" . 'mark-next-like-this))
 
   (use-package multiple-cursors
     :defer 2
@@ -1247,7 +1272,7 @@ A non-free program is a yoke, an instrument of unjust power.
 
   (use-package zzz-to-char
     :ensure t
-    :bind ("C-c d z" . zzz-up-to-char))
+    :bind ("C-M-z d z" . zzz-up-to-char))
 
   (use-package zop-to-char
     :defer 2
@@ -1257,9 +1282,9 @@ A non-free program is a yoke, an instrument of unjust power.
   (use-package dumb-jump
     :defer 2
     :diminish dumb-jump-mode
-    :bind (("C-c t d g" . dumb-jump-go)
-           ("C-c t d b" . dumb-jump-back)
-           ("C-c t d q" . dumb-jump-quick-look)))
+    :bind (("C-M-z t d g" . dumb-jump-go)
+           ("C-M-z t d b" . dumb-jump-back)
+           ("C-M-z t d q" . dumb-jump-quick-look)))
 
   (use-package focus
     :defer 2
@@ -1302,7 +1327,7 @@ A non-free program is a yoke, an instrument of unjust power.
     :diminish counsel-mode
     :bind (("M-x" . counsel-M-x)
            ("M-y" . counsel-yank-pop)
-           ;; ("C-c b r" . counsel-recentf)
+           ;; ("C-M-z b r" . counsel-recentf)
            ;; ("C-x C-f" . counsel-find-file)
            ;; ("<f1> f" . counsel-describe-function)
            ;; ("<f1> v" . counsel-describe-variable)
@@ -1318,7 +1343,7 @@ A non-free program is a yoke, an instrument of unjust power.
   (use-package swiper
     :diminish
     :bind (("C-s" . swiper)
-           ;; ("C-c C-r" . ivy-resume)
+           ;; ("C-M-z C-r" . ivy-resume)
            )
     :config
     (progn
@@ -1543,9 +1568,9 @@ A non-free program is a yoke, an instrument of unjust power.
   ;;        (treemacs-git-mode 'simple))))
   ;;   :bind
   ;;   (:map global-map
-  ;;         ("C-c x t t"      . treemacs-toggle)
-  ;;         ("C-c x t s"      . treemacs-select-window)
-  ;;         ("C-c x t d"      . treemacs-delete-other-windows)
+  ;;         ("C-M-z x t t"      . treemacs-toggle)
+  ;;         ("C-M-z x t s"      . treemacs-select-window)
+  ;;         ("C-M-z x t d"      . treemacs-delete-other-windows)
   ;;         ;; ("M-m ft"     . treemacs-toggle)
   ;;         ;; ("M-m fT"     . treemacs)
   ;;         ;; ("M-m fB"     . treemacs-bookmark)
@@ -1584,16 +1609,16 @@ A non-free program is a yoke, an instrument of unjust power.
 (use-package emms
   :diminish
   :bind
-  ("C-c x e a" . emms)
-  ("C-c x e b" . emms-smart-browse)
-  ("C-c x e u" . emms-player-mpd-update-all-reset-cache)
-  ("C-c x e c" . emms-playlist-clear)
-  ("C-c x e S" . emms-start)
-  ("C-c x e r" . emms-toggle-repeat-track)
-  ("C-c x e p" . emms-previous)
-  ("C-c x e n" . emms-next)
-  ("C-c x e P" . emms-pause)
-  ("C-c x e U" . mpd-update-database)
+  ("C-M-z x e a" . emms)
+  ("C-M-z x e b" . emms-smart-browse)
+  ("C-M-z x e u" . emms-player-mpd-update-all-reset-cache)
+  ("C-M-z x e c" . emms-playlist-clear)
+  ("C-M-z x e S" . emms-start)
+  ("C-M-z x e r" . emms-toggle-repeat-track)
+  ("C-M-z x e p" . emms-previous)
+  ("C-M-z x e n" . emms-next)
+  ("C-M-z x e P" . emms-pause)
+  ("C-M-z x e U" . mpd-update-database)
   :init
   (add-hook 'after-init-hook #'mpd-start-music-daemon)
   :config
@@ -1698,7 +1723,7 @@ A non-free program is a yoke, an instrument of unjust power.
   (use-package writegood-mode
     :defer 4
     :diminish writegood-mode
-    :bind ("C-c g" . writegood-mode)
+    :bind ("C-M-z g" . writegood-mode)
     :config
     (add-to-list 'writegood-weasel-words "actionable"))
 
@@ -1713,8 +1738,8 @@ A non-free program is a yoke, an instrument of unjust power.
     :defer 4
     :diminish
     :bind
-    ("C-c x d w" . define-word)
-    ("C-c x d a" . define-word-at-point))
+    ("C-M-z x d w" . define-word)
+    ("C-M-z x d a" . define-word-at-point))
 
   (use-package langtool
     :config
@@ -1730,7 +1755,7 @@ A non-free program is a yoke, an instrument of unjust power.
     :diminish
     :defer 3
     :bind (
-           ("C-c x E" . elfeed)
+           ("C-M-z x E" . elfeed)
            :map elfeed-show-mode-map
            ("m" . elfeed-play-with-mpv)
            )
@@ -1765,7 +1790,8 @@ A non-free program is a yoke, an instrument of unjust power.
             "http://atilanevesoncode.wordpress.com/feed/"
             "http://esr.ibiblio.org/?feed=rss2"
             "http://puri.sm/feed/"
-            "https://drewdevault.com/feed.xml"
+            "https://www.dsogaming.com/feed/"
+           "https://drewdevault.com/feed.xml"
             "http://feeds.feedburner.com/Phoronix"
             "http://lunduke.com/?feed=rss2"
             "http://vista-se.com.br/feed/"
@@ -1848,7 +1874,7 @@ A non-free program is a yoke, an instrument of unjust power.
      :defer 2
      :diminish
      :bind
-     ("C-c t s" . sudo-edit))
+     ("C-M-z t s" . sudo-edit))
 
   (use-package system-packages)
 
@@ -1886,6 +1912,14 @@ A non-free program is a yoke, an instrument of unjust power.
 ;; Search init file for bugs
 (use-package bug-hunter)
 
+;; always comnnpile packages, and use the newest version available.
+(use-package auto-compile
+  :diminish auto-compile-mode
+  :config
+  (auto-compile-on-load-mode)
+  (setq load-prefer-newer t))
+
+
 (use-package shackle
   :diminish shackle-mode
   :init (shackle-mode 1)
@@ -1909,7 +1943,7 @@ A non-free program is a yoke, an instrument of unjust power.
 
 (use-package engine-mode
   :config
-  (engine/set-keymap-prefix (kbd "C-c t e"))
+  (engine/set-keymap-prefix (kbd "C-M-z t e"))
   (defengine duckduckgo
     "https://duckduckgo.com/?q=%s"
     :keybinding "D"))
@@ -1942,21 +1976,21 @@ A non-free program is a yoke, an instrument of unjust power.
 (use-package crux
   :defer 2
   :diminish
-  ;; :bind (("C-c o" . crux-open-with)
+  ;; :bind (("C-M-z o" . crux-open-with)
   ;;        ("M-o" . crux-smart-open-line)
-  ;;        ("C-c n" . crux-cleanup-buffer-or-region)
-  ;;        ("C-c f" . crux-recentf-ido-find-file)
+  ;;        ("C-M-z n" . crux-cleanup-buffer-or-region)
+  ;;        ("C-M-z f" . crux-recentf-ido-find-file)
   ;;        ("C-M-z" . crux-indent-defun)
-  ;;        ("C-c u" . crux-view-url)
-  ;;        ("C-c e" . crux-eval-and-replace)
-  ;;        ("C-c w" . crux-swap-windows)
-  ;;        ("C-c D" . crux-delete-file-and-buffer)
-  ;;        ("C-c r" . crux-rename-buffer-and-file)
-  ;;        ("C-c t" . crux-visit-term-buffer)
-  ;;        ("C-c k" . crux-kill-other-buffers)
-  ;;        ("C-c TAB" . crux-indent-rigidly-and-copy-to-clipboard)
-  ;;        ("C-c I" . crux-find-user-init-file)
-  ;;        ("C-c S" . crux-find-shell-init-file)
+  ;;        ("C-M-z u" . crux-view-url)
+  ;;        ("C-M-z e" . crux-eval-and-replace)
+  ;;        ("C-M-z w" . crux-swap-windows)
+  ;;        ("C-M-z D" . crux-delete-file-and-buffer)
+  ;;        ("C-M-z r" . crux-rename-buffer-and-file)
+  ;;        ("C-M-z t" . crux-visit-term-buffer)
+  ;;        ("C-M-z k" . crux-kill-other-buffers)
+  ;;        ("C-M-z TAB" . crux-indent-rigidly-and-copy-to-clipboard)
+  ;;        ("C-M-z I" . crux-find-user-init-file)
+  ;;        ("C-M-z S" . crux-find-shell-init-file)
   ;;        ("s-r" . crux-recentf-ido-find-file)
   ;;        ("s-j" . crux-top-join-line)
   ;;        ("C-^" . crux-top-join-line)
@@ -1967,7 +2001,7 @@ A non-free program is a yoke, an instrument of unjust power.
   ;;        ([(shift return)] . crux-smart-open-line)
   ;;        ([(control shift return)] . crux-smart-open-line-above)
   ;;        ([remap kill-whole-line] . crux-kill-whole-line)
-  ;;        ("C-c s" . crux-ispell-word-then-abbrev))
+  ;;        ("C-M-z s" . crux-ispell-word-then-abbrev))
   )
 
 ;; (use-package async
@@ -2001,8 +2035,8 @@ A non-free program is a yoke, an instrument of unjust power.
   :defer 2
   :diminish
   :bind
-  ("C-c x r" . restart-emacs)
-  ("C-c x R" . restart-emacs-restore-frames))
+  ("C-M-z x r" . restart-emacs)
+  ("C-M-z x R" . restart-emacs-restore-frames))
 
 (use-package vlf
   :ensure t
@@ -2027,7 +2061,7 @@ A non-free program is a yoke, an instrument of unjust power.
 ;;:defer 2
 ;; :diminish
 ;; :init (persp-mode +1)
-;; :bind ("C-c x p" . persp-switch-last)
+;; :bind ("C-M-z x p" . persp-switch-last)
 ;; :config
 ;; (setq persp-interactive-completion-function #'ido-completing-read)
 ;; (persp-turn-off-modestring))
@@ -2035,7 +2069,7 @@ A non-free program is a yoke, an instrument of unjust power.
 ;; (use-package persp-projectile
 ;; :defer 2
 ;; :diminish
-;; :bind ("C-c x P" . projectile-persp-switch-project))
+;; :bind ("C-M-z x P" . projectile-persp-switch-project))
 
 ;; (use-package aria2
 ;;   :diminish)
@@ -2063,13 +2097,13 @@ A non-free program is a yoke, an instrument of unjust power.
   :pin org
   :defer 4
   :diminish org-mode-hook
-  :bind ("C-c c" . org-capture)
-  ("C-c l" . org-store-link)
-  ("C-c a" . org-agenda)
-  ("C-c b" . org-switchb)
+  :bind ("C-M-z c" . org-capture)
+  ("C-M-z l" . org-store-link)
+  ("C-M-z a" . org-agenda)
+  ("C-M-z b" . org-switchb)
   :config
-  ;; (define-key global-map "\C-cl" 'org-store-link)
-  ;; (defbine-key global-map "\C-ca" 'org-agenda)
+  ;; (define-key global-map "\C-M-zl" 'org-store-link)
+  ;; (defbine-key global-map "\C-M-za" 'org-agenda)
   (setq org-log-done t)
   ;; make tab act as if it were issued in a buffer of the language’s major mode.
   (setq org-src-tab-acts-natively t)
@@ -2143,7 +2177,7 @@ A non-free program is a yoke, an instrument of unjust power.
 ;; (setq org-directory "~/org")
 ;; (setq org-special-ctrl-a/e 't)
 ;; (setq org-default-notes-file (concat org-directory "/notes.org"))
-;; (define-key global-map "\C-cc" 'org-capture)
+;; (define-key global-map "\C-M-zc" 'org-capture)
 ;; (setq org-mobile-directory "~/Dropbox/Apps/MobileOrg")
 ;; (setq org-src-fontify-natively 't)
 ;; (setq org-src-tab-acts-natively t)
@@ -2411,7 +2445,7 @@ A non-free program is a yoke, an instrument of unjust power.
 
 ;; Permit yanking text to X11 clipboard; beats the heck out of
 ;; manually copying with the cursor.
-;; (global-set-key (kbd "C-c y") 'yank-to-x-clipboard)
+;; (global-set-key (kbd "C-M-z y") 'yank-to-x-clipboard)
 
 
 
@@ -2473,6 +2507,26 @@ A non-free program is a yoke, an instrument of unjust power.
     (delete-region $p1 $p2)
     (insert (concat "<a href=\"" (url-encode-url $new-str) "\">" $new-str "</a>" ))))
 
+
+;; --------------------------------------------------
+
+(defun xah-dired-sort ()
+  "Sort dired dir listing in different ways.
+Prompt for a choice.
+URL `http://ergoemacs.org/emacs/dired_sort.html'
+Version 2015-07-30"
+  (interactive)
+  (let ($sort-by $arg)
+    (setq $sort-by (ido-completing-read "Sort by:" '( "date" "size" "name" "dir")))
+    (cond
+     ((equal $sort-by "name") (setq $arg "-Al --si --time-style long-iso "))
+     ((equal $sort-by "date") (setq $arg "-Al --si --time-style long-iso -t"))
+     ((equal $sort-by "size") (setq $arg "-Al --si --time-style long-iso -S"))
+     ((equal $sort-by "dir") (setq $arg "-Al --si --time-style long-iso --group-directories-first"))
+     (t (error "logic error 09535" )))
+    (dired-sort-other $arg )))
+
+(define-key dired-mode-map (kbd "s") 'xah-dired-sort)
 
 ;;--------------------------------------------------
 (defun xah-delete-current-file-make-backup (&optional @no-backup-p)
