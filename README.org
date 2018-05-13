@@ -426,6 +426,12 @@ A non-free program is a yoke, an instrument of unjust power.
 
 (use-package hydra
   :config
+
+  (defhydra hydra-zoom (global-map "C-c x h")
+    "zoom"
+    ("e" enlarge-window "Enlarge Window")
+    ("E" enlarge-window-horizontally "Enlarge Window Horizontally"))
+
   (defhydra hydra-launcher (:color blue)
     "Launch"
     ("h" man "man")
@@ -433,7 +439,7 @@ A non-free program is a yoke, an instrument of unjust power.
     ("w" (browse-url "http://www.emacswiki.org/") "emacswiki")
     ("s" shell "shell")
     ("q" nil "cancel"))
-  (global-set-key (kbd "C-M-z r") 'hydra-launcher/body))
+  (global-set-key (kbd "C-c x r") 'hydra-launcher/body))
 
 #+end_src
 
@@ -445,24 +451,24 @@ A non-free program is a yoke, an instrument of unjust power.
             (define-prefix-command (cdr entry))
             (bind-key (car entry) (cdr entry)))
         '(
-          ("C-M-z b" . Bultin)
-          ("C-M-z @" . Hs)
-          ("C-M-z x d" . DefineWord)
-          ("C-M-z d" . Devel)
-          ("C-M-z g" . Goto-last)
-          ("C-M-z g" . Goto-last)
-          ("C-M-z e" . Move-text)
-          ("C-M-z s" . Smartparens)
-          ;; ("C-M-z S" . Spell)
-          ("C-M-z x" . Apps)
-          ("C-M-z x e" . Emms)
-          ("C-M-z o" . OraFunctions)
-          ("C-M-z f" . CustomDefun)
-          ("C-M-z y" . Yasnippet)
-          ("C-M-z h" . Hydra)
-          ("C-M-z u" . Url)
-          ("C-M-z t" . Tools)
-          ("C-M-z t d" . Dumb-Jump)
+          ("C-c x b" . Bultin)
+          ("C-c x @" . Hs)
+          ("C-c x x d" . DefineWord)
+          ("C-c x d" . Devel)
+          ("C-c x g" . Goto-last)
+          ("C-c x g" . Goto-last)
+          ("C-c x e" . Move-text)
+          ("C-c x s" . Smartparens)
+          ;; ("C-c x S" . Spell)
+          ("C-c x x" . Apps)
+          ("C-c x x e" . Emms)
+          ("C-c x o" . OraFunctions)
+          ("C-c x f" . CustomDefun)
+          ("C-c x y" . Yasnippet)
+          ("C-c x h" . Hydra)
+          ("C-c x u" . Url)
+          ("C-c x t" . Tools)
+          ("C-c x t d" . Dumb-Jump)
           ;; ("C-,"   . my-ctrl-comma-map)
           ;; ("<C-m>" . my-ctrl-m-map)
           )))
@@ -472,18 +478,18 @@ A non-free program is a yoke, an instrument of unjust power.
 #+BEGIN_SRC emacs-lisp :tangle yes
 (bind-keys
  ;; Bultin
- ("C-M-z b a" . ansi-term)
- ("C-M-z b s" . shell)
- ("C-M-z b e" . eshell)
- ("C-M-z b v" . eval-buffer)
- ("C-M-z b k" . kill-buffer-and-window)
+ ("C-c x b a" . ansi-term)
+ ("C-c x b s" . shell)
+ ("C-c x b e" . eshell)
+ ("C-c x b v" . eval-buffer)
+ ("C-c x b k" . kill-buffer-and-window)
  ("C-x K" . kill-this-buffer)
 
  ;; Custom defuns
- ("C-M-z f d" . xah-delete-current-file-make-backup)
+ ("C-c x f d" . xah-delete-current-file-make-backup)
 
  ;; Orafunctions
- ("C-M-z o w" . ora-open-wikipedia)
+ ("C-c x o w" . ora-open-wikipedia)
 
  ;; use hippie-expand instead of dabbrev
  ("M-/" . hippie-expand)
@@ -494,10 +500,10 @@ A non-free program is a yoke, an instrument of unjust power.
 ;; (define-key dired-mode-map (kbd "^") (lambda () (interactive) (find-alternate-file "..")))  ; was dired-up-directory
 
 ;; Moving through windows
-;; (global-set-key (kbd "C-M-z w p") 'windmove-up)
-;; (global-set-key (kbd "C-M-z w n") 'windmove-down)
-;; (global-set-key (kbd "C-M-z w f") 'windmove-right)
-;; (global-set-key (kbd "C-M-z w b") 'windmove-left)
+;; (global-set-key (kbd "C-c x w p") 'windmove-up)
+;; (global-set-key (kbd "C-c x w n") 'windmove-down)
+;; (global-set-key (kbd "C-c x w f") 'windmove-right)
+;; (global-set-key (kbd "C-c x w b") 'windmove-left)
 #+END_SRC
 
 
@@ -698,6 +704,10 @@ A non-free program is a yoke, an instrument of unjust power.
   (interactive)
   (start-process-shell-command "killall pulseaudio & pulseaudio &" nil "killall pulseaudio & pulseaudio &"))
 
+(defun popcorn ()
+  (interactive)
+  (start-process-shell-command "cd ~/Temps/pop/ || exit && ./Popcorn-Time" nil "cd ~/Temps/pop/ || exit && ./Popcorn-Time"))
+
 (defun background-shell-command (command)
   (interactive (list (read-shell-command "$ ")))
   (with-temp-buffer
@@ -707,7 +717,7 @@ A non-free program is a yoke, an instrument of unjust power.
   "Open some few apps in specific workspaces"
   (interactive)
   ;; (exwm-workspace-switch 1)
-  (start-process-shell-command "falkon" nil "falkon")
+  (start-process-shell-command "iceweasel" nil "iceweasel")
   ;; (sleep-for 2)
   ;; (exwm-workspace-switch 3)
   (start-process-shell-command "steam" nil "steam"))
@@ -717,172 +727,173 @@ A non-free program is a yoke, an instrument of unjust power.
 ** EXWM keybindings
 #+BEGIN_SRC emacs-lisp :tangle yes
 
-  ;; Workspaces
-  (exwm-input-set-key (kbd "s-n") 'exwm-workspace-next)
-  (exwm-input-set-key (kbd "s-p") 'exwm-workspace-prev)
+;; Workspaces
+(exwm-input-set-key (kbd "s-n") 'exwm-workspace-next)
+(exwm-input-set-key (kbd "s-p") 'exwm-workspace-prev)
 
-  (exwm-input-set-key (kbd "<s-tab>") 'exwm-jump-to-last-exwm)
+(exwm-input-set-key (kbd "<s-tab>") 'exwm-jump-to-last-exwm)
 
-  ;; + set shortcuts to switch to a certain workspace.
-  (exwm-input-set-key (kbd "s-1")
-                      (lambda () (interactive) (exwm-workspace-switch 0)))
-  (exwm-input-set-key (kbd "s-2")
-                      (lambda () (interactive) (exwm-workspace-switch 1)))
-  (exwm-input-set-key (kbd "s-3")
-                      (lambda () (interactive) (exwm-workspace-switch 2)))
+;; + set shortcuts to switch to a certain workspace.
+(exwm-input-set-key (kbd "s-1")
+                    (lambda () (interactive) (exwm-workspace-switch 0)))
+(exwm-input-set-key (kbd "s-2")
+                    (lambda () (interactive) (exwm-workspace-switch 1)))
+(exwm-input-set-key (kbd "s-3")
+                    (lambda () (interactive) (exwm-workspace-switch 2)))
 
-  ;; + bind a key to switch workspace interactively
-  ;; (exwm-input-set-key (kbd "s-W") 'exwm-workspace-switch)
+;; + bind a key to switch workspace interactively
+;; (exwm-input-set-key (kbd "s-W") 'exwm-workspace-switch)
 
-  ;; + bind a key to switch workspace interactively
-  (exwm-input-set-key (kbd "s-m") 'exwm-workspace-move-window)
+;; + bind a key to switch workspace interactively
+(exwm-input-set-key (kbd "s-m") 'exwm-workspace-move-window)
 
-  ;; Last workspace visited
-  (exwm-input-set-key (kbd "<s-tab>") #'exwm-jump-to-last-exwm)
+;; Last workspace visited
+(exwm-input-set-key (kbd "<s-tab>") #'exwm-jump-to-last-exwm)
 
-  ;; restart
-  ;; (exwm-input-set-key (kbd "s-r") 'exwm-reset)
-  ;; (exwm-input-set-key (kbd "s-R") 'exwm-restart)
+;; restart
+;; (exwm-input-set-key (kbd "s-r") 'exwm-reset)
+;; (exwm-input-set-key (kbd "s-R") 'exwm-restart)
 
-  (exwm-input-set-key (kbd "s-F") 'exwm-layout-toggle-fullscreen)
-  (exwm-input-set-key (kbd "s-T") 'exwm-floating-toggle-floating)
+(exwm-input-set-key (kbd "s-F") 'exwm-layout-toggle-fullscreen)
+(exwm-input-set-key (kbd "s-T") 'exwm-floating-toggle-floating)
 
-  ;; exwm mode-line
-  ;; (exwm-input-set-key (kbd "s-<") #'exwm-layout-hide-mode-line)
-  ;; (exwm-input-set-key (kbd "s->") #'exwm-layout-show-mode-line)
-  ;; (exwm-input-set-key (kbd "s-M") 'exwm-layout-toggle-mode-line)
-  ;; (exwm-input-set-key (kbd "s-u") 'exwm-input-toggle-keyboard)
+;; exwm mode-line
+;; (exwm-input-set-key (kbd "s-<") #'exwm-layout-hide-mode-line)
+;; (exwm-input-set-key (kbd "s->") #'exwm-layout-show-mode-line)
+;; (exwm-input-set-key (kbd "s-M") 'exwm-layout-toggle-mode-line)
+;; (exwm-input-set-key (kbd "s-u") 'exwm-input-toggle-keyboard)
 
-  ;; [EMACS FEATURES]
+;; [EMACS FEATURES]
 
-  (exwm-input-set-key (kbd "s-x") 'counsel-M-x) ;; M-x
+(exwm-input-set-key (kbd "s-x") 'counsel-M-x) ;; M-x
 
-  ;; [BUFFERS]
-  (exwm-input-set-key (kbd "s-b") 'ivy-switch-buffer)
-  (exwm-input-set-key (kbd "s-i") 'ibuffer)
-  (exwm-input-set-key (kbd "s-f") 'counsel-find-file)
-  (exwm-input-set-key (kbd "s-K") (lambda () (interactive) (kill-buffer))) ;; kill visible buffer
-  ;; (exwm-input-set-key (kbd "s-K") 'kill-this-buffer)
+;; [BUFFERS]
+(exwm-input-set-key (kbd "s-b") 'ivy-switch-buffer)
+(exwm-input-set-key (kbd "s-i") 'ibuffer)
+(exwm-input-set-key (kbd "s-f") 'counsel-find-file)
+(exwm-input-set-key (kbd "s-K") (lambda () (interactive) (kill-buffer))) ;; kill visible buffer
+;; (exwm-input-set-key (kbd "s-K") 'kill-this-buffer)
 
-  ;; [TERM]
-  (exwm-input-set-key (kbd "s-V") 'eshell)
+;; [TERM]
+(exwm-input-set-key (kbd "s-v") 'multi-term)
+(exwm-input-set-key (kbd "s-V") 'eshell)
 
-  ;; [WINDOWS]
+;; [WINDOWS]
 
-  ;; jump to buffers with s-[hjkl]
-  (exwm-input-set-key (kbd "s-h") 'windmove-left)
-  (exwm-input-set-key (kbd "s-j") 'windmove-down)
-  (exwm-input-set-key (kbd "s-k") 'windmove-up)
-  (exwm-input-set-key (kbd "s-l") 'windmove-right)
+;; jump to buffers with s-[hjkl]
+(exwm-input-set-key (kbd "s-h") 'windmove-left)
+(exwm-input-set-key (kbd "s-j") 'windmove-down)
+(exwm-input-set-key (kbd "s-k") 'windmove-up)
+(exwm-input-set-key (kbd "s-l") 'windmove-right)
 
-  (exwm-input-set-key (kbd "s-[") 'shrink-window-horizontally)
-  (exwm-input-set-key (kbd "s-{") 'shrink-window)
-  (exwm-input-set-key (kbd "s-]") 'enlarge-window-horizontally)
-  (exwm-input-set-key (kbd "s-}") 'enlarge-window)
+(exwm-input-set-key (kbd "s-[") 'shrink-window-horizontally)
+(exwm-input-set-key (kbd "s-{") 'shrink-window)
+(exwm-input-set-key (kbd "s-]") 'enlarge-window-horizontally)
+(exwm-input-set-key (kbd "s-}") 'enlarge-window)
 
-  (exwm-input-set-key (kbd "s-z") 'dmenu)
+(exwm-input-set-key (kbd "s-z") 'dmenu)
 
-  ;;Emms
-  (exwm-input-set-key (kbd "s-a") 'emms-player-mpd-previous)
-  (exwm-input-set-key (kbd "s-d") 'emms-player-mpd-next)
-  (exwm-input-set-key (kbd "s-W") 'emms-volume-raise)
-  (exwm-input-set-key (kbd "s-S") 'emms-volume-lower)
-  (exwm-input-set-key (kbd "s-E") 'emms-smart-browse)
-  (exwm-input-set-key (kbd "s-SPC") 'emms-pause)
+;;Emms
+(exwm-input-set-key (kbd "s-a") 'emms-player-mpd-previous)
+(exwm-input-set-key (kbd "s-d") 'emms-player-mpd-next)
+(exwm-input-set-key (kbd "s-W") 'emms-volume-raise)
+(exwm-input-set-key (kbd "s-S") 'emms-volume-lower)
+(exwm-input-set-key (kbd "s-E") 'emms-smart-browse)
+(exwm-input-set-key (kbd "s-SPC") 'emms-pause)
 
   ;;; Pulseaudio
-  (when (require 'pulseaudio-control nil t)
-    (exwm-input-set-key (kbd "s-w") 'pulseaudio-control-increase-volume)
-    (exwm-input-set-key (kbd "s-s") 'pulseaudio-control-decrease-volume)
-    (exwm-input-set-key (kbd "s-e") 'pulseaudio-control-toggle-current-sink-mute))
+(when (require 'pulseaudio-control nil t)
+  (exwm-input-set-key (kbd "s-w") 'pulseaudio-control-increase-volume)
+  (exwm-input-set-key (kbd "s-s") 'pulseaudio-control-decrease-volume)
+  (exwm-input-set-key (kbd "s-e") 'pulseaudio-control-toggle-current-sink-mute))
 
 
-  (exwm-input-set-key (kbd "s-g") 'narrow-or-widen-dwim)
+(exwm-input-set-key (kbd "s-g") 'narrow-or-widen-dwim)
 
-  ;; [Emacs config bindings]
-  (exwm-input-set-key (kbd "s-r") (lambda () (interactive) (find-file "~/.emacs.d/README.org")))
-  (exwm-input-set-key (kbd "s-R") (lambda () (interactive) (find-file "~/.emacs.d/init.el")))
-
-
-  ;; [EXTERNAL APPLICATIONS]
-
-  (exwm-input-set-key (kbd "s-P")
-                      #'background-shell-command)
-
-  (exwm-input-set-key (kbd "s-c")
-                      (lambda ()
-                        (interactive)
-                        (start-process-shell-command "slock" nil "slock")))
-
-  (exwm-input-set-key (kbd "s-v")
-                      (lambda ()
-                        (interactive)
-                        (start-process-shell-command "st" nil "st")))
+;; [Emacs config bindings]
+(exwm-input-set-key (kbd "s-r") (lambda () (interactive) (find-file "~/.emacs.d/README.org")))
+(exwm-input-set-key (kbd "s-R") (lambda () (interactive) (find-file "~/.emacs.d/init.el")))
 
 
-  ;; Scrot
-  (exwm-input-set-key (kbd "<print>") (lambda () (interactive) (start-process-shell-command "scrot" nil "scrot ~/Pictures/shot-$(date -Iseconds | cut -d'+' -f1).png")))
+;; [EXTERNAL APPLICATIONS]
 
-  ;; [LEGACY]
+(exwm-input-set-key (kbd "s-P")
+                    #'background-shell-command)
 
-  ;; alsamixer
+(exwm-input-set-key (kbd "s-c")
+                    (lambda ()
+                      (interactive)
+                      (start-process-shell-command "slock" nil "slock")))
 
-  ;; (exwm-input-set-key (kbd "s-w")
-  ;;                     (lambda () (interactive) (shell-command "amixer set Master 5%+")))
-  ;; (exwm-input-set-key (kbd "s-s")
-  ;;                     (lambda () (interactive) (shell-command "amixer set Master 5%-")))
-  ;; (exwm-input-set-key (kbd "s-e")
-  ;;                     (lambda () (interactive) (shell-command "amixer set Master 1+ toggle")))
+;; (exwm-input-set-key (kbd "s-v")
+;;                     (lambda ()
+;;                       (interactive)
+;;                       (start-process-shell-command "st" nil "st")))
 
-  ;; Screen Brightness
-  ;; (exwm-input-set-key (kbd "<XF86MonBrightnessDown>") (lambda () (interactive) (shell-command "light -U 5; light")))
-  ;; (exwm-input-set-key (kbd "<XF86MonBrightnessUp>") (lambda () (interactive) (shell-command "light -A 5; light")))
 
-  ;; [Key siminulation]
+;; Scrot
+(exwm-input-set-key (kbd "<print>") (lambda () (interactive) (start-process-shell-command "scrot" nil "scrot ~/Pictures/shot-$(date -Iseconds | cut -d'+' -f1).png")))
 
-  ;; ;; Line-editing shortcuts
-  ;; (exwm-input-set-simulation-keys
-  ;;  '(([?\C-b] . left)
-  ;;    ([?\C-f] . right)
-  ;;    ([?\M-f] . C-right)
-  ;;    ([?\M-b] . C-left)
-  ;;    ([?\C-y] . S-insert)
-  ;;    ([?\C-p] . up)
-  ;;    ([?\C-n] . down)
-  ;;    ([?\C-a] . home)
-  ;;    ([?\C-e] . end)
-  ;;    ([?\M-v] . prior)
-  ;;    ([?\C-v] . next)
-  ;;    ([?\C-d] . delete)
-  ;;    ([?\C-k] . (S-end delete))))
+;; [LEGACY]
 
-  ;; The following example demonstrates how to set a key binding only available
-  ;; in line mode. It's simply done by first push the prefix key to
-  ;; ;; `exwm-input-prefix-keys' and then add the key sequence to `exwm-mode-map'.
-  ;; ;; The example shorten 'C-M-z q' to 'C-q'.
-  ;; (push ?\C-q exwm-input-prefix-keys)
-  ;; (define-key exwm-mode-map [?\C-q] 'exwm-input-send-next-key)
-  ;; ;; M-m leader, sorry Space Folks
-  ;; (push ?\M-m exwm-input-prefix-keys)
-  ;; ;; Universal Get-me-outta-here
-  ;; (push ?\C-g exwm-input-prefix-keys)
-  ;; ;; Universal Arguments
-  ;; (push ?\C-u exwm-input-prefix-keys)
-  ;; (push ?\C-0 exwm-input-prefix-keys)
-  ;; (push ?\C-1 exwm-input-prefix-keys)
-  ;; (push ?\C-2 exwm-input-prefix-keys)
-  ;; (push ?\C-3 exwm-input-prefix-keys)
-  ;; (push ?\C-4 exwm-input-prefix-keys)
-  ;; (push ?\C-5 exwm-input-prefix-keys)
-  ;; (push ?\C-6 exwm-input-prefix-keys)
-  ;; (push ?\C-7 exwm-input-prefix-keys)
-  ;; (push ?\C-8 exwm-input-prefix-keys)
-  ;; (push ?\C-9 exwm-input-prefix-keys)
-  ;; ;; C-M-z, C-x are needed for copying and pasting
-  ;; (delete ?\C-x exwm-input-prefix-keys)
-  ;; (delete ?\C-M-z exwm-input-prefix-keys)
-  ;; ;; We can use `M-m h' to access help
-  ;; (delete ?\C-h exwm-input-prefix-keys)
+;; alsamixer
+
+;; (exwm-input-set-key (kbd "s-w")
+;;                     (lambda () (interactive) (shell-command "amixer set Master 5%+")))
+;; (exwm-input-set-key (kbd "s-s")
+;;                     (lambda () (interactive) (shell-command "amixer set Master 5%-")))
+;; (exwm-input-set-key (kbd "s-e")
+;;                     (lambda () (interactive) (shell-command "amixer set Master 1+ toggle")))
+
+;; Screen Brightness
+;; (exwm-input-set-key (kbd "<XF86MonBrightnessDown>") (lambda () (interactive) (shell-command "light -U 5; light")))
+;; (exwm-input-set-key (kbd "<XF86MonBrightnessUp>") (lambda () (interactive) (shell-command "light -A 5; light")))
+
+;; [Key siminulation]
+
+;; ;; Line-editing shortcuts
+;; (exwm-input-set-simulation-keys
+;;  '(([?\C-b] . left)
+;;    ([?\C-f] . right)
+;;    ([?\M-f] . C-right)
+;;    ([?\M-b] . C-left)
+;;    ([?\C-y] . S-insert)
+;;    ([?\C-p] . up)
+;;    ([?\C-n] . down)
+;;    ([?\C-a] . home)
+;;    ([?\C-e] . end)
+;;    ([?\M-v] . prior)
+;;    ([?\C-v] . next)
+;;    ([?\C-d] . delete)
+;;    ([?\C-k] . (S-end delete))))
+
+;; The following example demonstrates how to set a key binding only available
+;; in line mode. It's simply done by first push the prefix key to
+;; ;; `exwm-input-prefix-keys' and then add the key sequence to `exwm-mode-map'.
+;; ;; The example shorten 'C-c x q' to 'C-q'.
+;; (push ?\C-q exwm-input-prefix-keys)
+;; (define-key exwm-mode-map [?\C-q] 'exwm-input-send-next-key)
+;; ;; M-m leader, sorry Space Folks
+;; (push ?\M-m exwm-input-prefix-keys)
+;; ;; Universal Get-me-outta-here
+;; (push ?\C-g exwm-input-prefix-keys)
+;; ;; Universal Arguments
+;; (push ?\C-u exwm-input-prefix-keys)
+;; (push ?\C-0 exwm-input-prefix-keys)
+;; (push ?\C-1 exwm-input-prefix-keys)
+;; (push ?\C-2 exwm-input-prefix-keys)
+;; (push ?\C-3 exwm-input-prefix-keys)
+;; (push ?\C-4 exwm-input-prefix-keys)
+;; (push ?\C-5 exwm-input-prefix-keys)
+;; (push ?\C-6 exwm-input-prefix-keys)
+;; (push ?\C-7 exwm-input-prefix-keys)
+;; (push ?\C-8 exwm-input-prefix-keys)
+;; (push ?\C-9 exwm-input-prefix-keys)
+;; ;; C-c x, C-x are needed for copying and pasting
+;; (delete ?\C-x exwm-input-prefix-keys)
+;; (delete ?\C-c x exwm-input-prefix-keys)
+;; ;; We can use `M-m h' to access help
+;; (delete ?\C-h exwm-input-prefix-keys)
 
 #+END_SRC
 
@@ -902,7 +913,7 @@ A non-free program is a yoke, an instrument of unjust power.
           company-minimum-prefix-length 2
           company-tooltip-limit 20)
     :bind
-    ("C-M-z y c" . company-files))
+    ("C-c x y c" . company-files))
 
   (use-package company-quickhelp
     :diminish company-quickhelp-mode
@@ -912,7 +923,7 @@ A non-free program is a yoke, an instrument of unjust power.
 
   (with-eval-after-load 'company
     (company-quickhelp-mode)
-    (define-key company-active-map (kbd "C-M-z c q") #'company-quickhelp-manual-begin))
+    (define-key company-active-map (kbd "C-c x c q") #'company-quickhelp-manual-begin))
 
   (use-package company-shell
     :diminish company-shell-modes
@@ -982,7 +993,7 @@ A non-free program is a yoke, an instrument of unjust power.
   (use-package yasnippet
     :diminish yas-minor-mode
     :bind
-    ("C-M-z y y" . yas-expand)
+    ("C-c x y y" . yas-expand)
     (:map yas-minor-mode-map
           ("TAB" . nil)
           ("<tab>" . nil))
@@ -1015,9 +1026,9 @@ A non-free program is a yoke, an instrument of unjust power.
     :defer 2
     :after yasnippet
     :commands (aya-create aya-open-line)
-    :bind (("C-M-z y a" . aya-create)
-           ("C-M-z y e" . aya-expand)
-           ("C-M-z y o" . aya-open-line)))
+    :bind (("C-c x y a" . aya-create)
+           ("C-c x y e" . aya-expand)
+           ("C-c x y o" . aya-open-line)))
 #+end_src
 
 
@@ -1105,54 +1116,55 @@ A non-free program is a yoke, an instrument of unjust power.
 
 ** Pair handlers
 #+begin_src emacs-lisp :tangle yes
-    (use-package smartparens-config
-      :diminish (smartparens-mode)
-      :ensure smartparens
-      :hook
-      (org-mode . smartparens-strict-mode)
-      (prog-mode . smartparens-strict-mode)
-      :config
-      (progn
-        (show-smartparens-global-mode t))
-      :bind
-      ("C-M-z s f o" . sp-forward-sexp)
-      ("C-M-z s B" . sp-backward-sexp)
-      ("C-M-z s b u" . sp-backward-up-sexp)
-      ("C-M-z s b d" . sp-backward-down-sexp)
-      ("C-M-z s b e" . sp-beginning-of-sexp)
-      ("C-M-z s e n" . sp-end-of-sexp)
-      ("C-M-z s d o" . sp-down-sexp)
-      ("C-M-z s u p" . sp-up-sexp)
-      ("C-M-z s n" . sp-next-sexp)
-      ("C-M-z s p" . sp-previous-sexp)
-      ("C-M-z s k" . sp-kill-sexp)
-      ("C-M-z s c" . sp-copy-sexp)
-      ("C-M-z s u n" . sp-unwrap-sexp)
-      ("C-M-z s u b" . sp-backward-unwrap-sexp)
-      ("C-M-z s f s" . sp-forward-slurp-sexp)
-      ("C-M-z s f b" . sp-forward-barf-sexp)
-      ("C-M-z s b s" . sp-backward-slurp-sexp)
-      ("C-M-z s b b" . sp-backward-barf-sexp)
-      ("C-M-z s s p" . sp-splice-sexp)
-      ("C-M-z s s b" . sp-splice-sexp-killing-backward)
-      ("C-M-z s s k" . sp-splice-sexp-killing-around)
-      ("C-M-z s s n e" . sp-select-next-thing-exchange)
-      ("C-M-z s s n t" . sp-select-next-thing)
-      ("C-M-z s m" . sp-mark-sexp)
-      ("C-M-z s f S" . sp-forward-symbol)
-      ("C-M-z s b S" . sp-backward-symbol))
+(use-package smartparens-config
+  :diminish (smartparens-mode)
+  :ensure smartparens
+  :hook
+  (org-mode . smartparens-strict-mode)
+  (prog-mode . smartparens-strict-mode)
+  (scheme-mode . smartparens-strict-mode)
+  :config
+  (progn
+    (show-smartparens-global-mode t))
+  :bind
+  ("C-c x s f o" . sp-forward-sexp)
+  ("C-c x s B" . sp-backward-sexp)
+  ("C-c x s b u" . sp-backward-up-sexp)
+  ("C-c x s b d" . sp-backward-down-sexp)
+  ("C-c x s b e" . sp-beginning-of-sexp)
+  ("C-c x s e n" . sp-end-of-sexp)
+  ("C-c x s d o" . sp-down-sexp)
+  ("C-c x s u p" . sp-up-sexp)
+  ("C-c x s n" . sp-next-sexp)
+  ("C-c x s p" . sp-previous-sexp)
+  ("C-c x s k" . sp-kill-sexp)
+  ("C-c x s c" . sp-copy-sexp)
+  ("C-c x s u n" . sp-unwrap-sexp)
+  ("C-c x s u b" . sp-backward-unwrap-sexp)
+  ("C-c x s f s" . sp-forward-slurp-sexp)
+  ("C-c x s f b" . sp-forward-barf-sexp)
+  ("C-c x s b s" . sp-backward-slurp-sexp)
+  ("C-c x s b b" . sp-backward-barf-sexp)
+  ("C-c x s s p" . sp-splice-sexp)
+  ("C-c x s s b" . sp-splice-sexp-killing-backward)
+  ("C-c x s s k" . sp-splice-sexp-killing-around)
+  ("C-c x s s n e" . sp-select-next-thing-exchange)
+  ("C-c x s s n t" . sp-select-next-thing)
+  ("C-c x s m" . sp-mark-sexp)
+  ("C-c x s f S" . sp-forward-symbol)
+  ("C-c x s b S" . sp-backward-symbol))
 
-    (use-package emacs-surround
-      :ensure nil
-      :bind ("C-M-z d q" . emacs-surround))
+(use-package emacs-surround
+  :ensure nil
+  :bind ("C-c x d q" . emacs-surround))
 
-    (use-package rainbow-delimiters
-      :diminish rainbow-delimiters-mode
-      :init
-      (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
+(use-package rainbow-delimiters
+  :diminish rainbow-delimiters-mode
+  :init
+  (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
 
-    (use-package electric-operator
-      :diminish electric-operator-mode)
+(use-package electric-operator
+  :diminish electric-operator-mode)
 #+end_src
 
 ** Undo history handlers
@@ -1197,8 +1209,8 @@ A non-free program is a yoke, an instrument of unjust power.
 
   (use-package move-text
     :bind
-    ("C-M-z d m u" . move-text-bup)
-    ("C-M-z d m d" . move-text-down))
+    ("C-c x d m u" . move-text-bup)
+    ("C-c x d m d" . move-text-down))
 
   (use-package anzu
     :diminish anzu-mode
@@ -1209,15 +1221,15 @@ A non-free program is a yoke, an instrument of unjust power.
 
   (use-package goto-chg
     :bind
-    ("C-M-z d g a" . goto-last-change)
-    ("C-M-z d g r" . goto-last-change-reverse))
+    ("C-c x d g a" . goto-last-change)
+    ("C-c x d g r" . goto-last-change-reverse))
 
   ;; (use-package origami
   ;;   :diminish origami-mode
   ;;   :after (dash s)
   ;;   :commands global-origami-mode
   ;;   :init (global-origami-mode t)
-  ;;   :bind ("C-M-z d o" . origami-toggle-node))
+  ;;   :bind ("C-c x d o" . origami-toggle-node))
 
   ;; (use-package vimish-fold
   ;;   :defer 1
@@ -1251,7 +1263,7 @@ A non-free program is a yoke, an instrument of unjust power.
     ("C-=" . er/expand-region))
 
   (use-package mark-multiple
-    :bind ("C-M-z d n" . 'mark-next-like-this))
+    :bind ("C-c x d n" . 'mark-next-like-this))
 
   (use-package multiple-cursors
     :defer 2
@@ -1272,7 +1284,7 @@ A non-free program is a yoke, an instrument of unjust power.
 
   (use-package zzz-to-char
     :ensure t
-    :bind ("C-M-z d z" . zzz-up-to-char))
+    :bind ("C-c x d z" . zzz-up-to-char))
 
   (use-package zop-to-char
     :defer 2
@@ -1282,9 +1294,9 @@ A non-free program is a yoke, an instrument of unjust power.
   (use-package dumb-jump
     :defer 2
     :diminish dumb-jump-mode
-    :bind (("C-M-z t d g" . dumb-jump-go)
-           ("C-M-z t d b" . dumb-jump-back)
-           ("C-M-z t d q" . dumb-jump-quick-look)))
+    :bind (("C-c x t d g" . dumb-jump-go)
+           ("C-c x t d b" . dumb-jump-back)
+           ("C-c x t d q" . dumb-jump-quick-look)))
 
   (use-package focus
     :defer 2
@@ -1327,7 +1339,7 @@ A non-free program is a yoke, an instrument of unjust power.
     :diminish counsel-mode
     :bind (("M-x" . counsel-M-x)
            ("M-y" . counsel-yank-pop)
-           ;; ("C-M-z b r" . counsel-recentf)
+           ;; ("C-c x b r" . counsel-recentf)
            ;; ("C-x C-f" . counsel-find-file)
            ;; ("<f1> f" . counsel-describe-function)
            ;; ("<f1> v" . counsel-describe-variable)
@@ -1343,7 +1355,7 @@ A non-free program is a yoke, an instrument of unjust power.
   (use-package swiper
     :diminish
     :bind (("C-s" . swiper)
-           ;; ("C-M-z C-r" . ivy-resume)
+           ;; ("C-c x C-r" . ivy-resume)
            )
     :config
     (progn
@@ -1568,9 +1580,9 @@ A non-free program is a yoke, an instrument of unjust power.
   ;;        (treemacs-git-mode 'simple))))
   ;;   :bind
   ;;   (:map global-map
-  ;;         ("C-M-z x t t"      . treemacs-toggle)
-  ;;         ("C-M-z x t s"      . treemacs-select-window)
-  ;;         ("C-M-z x t d"      . treemacs-delete-other-windows)
+  ;;         ("C-c x x t t"      . treemacs-toggle)
+  ;;         ("C-c x x t s"      . treemacs-select-window)
+  ;;         ("C-c x x t d"      . treemacs-delete-other-windows)
   ;;         ;; ("M-m ft"     . treemacs-toggle)
   ;;         ;; ("M-m fT"     . treemacs)
   ;;         ;; ("M-m fB"     . treemacs-bookmark)
@@ -1609,16 +1621,16 @@ A non-free program is a yoke, an instrument of unjust power.
 (use-package emms
   :diminish
   :bind
-  ("C-M-z x e a" . emms)
-  ("C-M-z x e b" . emms-smart-browse)
-  ("C-M-z x e u" . emms-player-mpd-update-all-reset-cache)
-  ("C-M-z x e c" . emms-playlist-clear)
-  ("C-M-z x e S" . emms-start)
-  ("C-M-z x e r" . emms-toggle-repeat-track)
-  ("C-M-z x e p" . emms-previous)
-  ("C-M-z x e n" . emms-next)
-  ("C-M-z x e P" . emms-pause)
-  ("C-M-z x e U" . mpd-update-database)
+  ("C-c x x e a" . emms)
+  ("C-c x x e b" . emms-smart-browse)
+  ("C-c x x e u" . emms-player-mpd-update-all-reset-cache)
+  ("C-c x x e c" . emms-playlist-clear)
+  ("C-c x x e S" . emms-start)
+  ("C-c x x e r" . emms-toggle-repeat-track)
+  ("C-c x x e p" . emms-previous)
+  ("C-c x x e n" . emms-next)
+  ("C-c x x e P" . emms-pause)
+  ("C-c x x e U" . mpd-update-database)
   :init
   (add-hook 'after-init-hook #'mpd-start-music-daemon)
   :config
@@ -1638,11 +1650,11 @@ A non-free program is a yoke, an instrument of unjust power.
         emms-browser-covers 'emms-browser-cache-thumbnail
         emms-player-mpd-server-name "localhost"
         emms-player-mpd-server-port "6600" ;; Setting the default port
-        ;; mpc-host "localhost:6600"
+        mpc-host "localhost:6600"
         emms-source-file-default-directory "~/Music/"
         ))
 
-(use-package helm-emms)
+;; (use-package helm-emms)
 
 ;; (use-package emms-mode-line-cycle
 ;;   :config
@@ -1723,7 +1735,7 @@ A non-free program is a yoke, an instrument of unjust power.
   (use-package writegood-mode
     :defer 4
     :diminish writegood-mode
-    :bind ("C-M-z g" . writegood-mode)
+    :bind ("C-c x g" . writegood-mode)
     :config
     (add-to-list 'writegood-weasel-words "actionable"))
 
@@ -1738,8 +1750,8 @@ A non-free program is a yoke, an instrument of unjust power.
     :defer 4
     :diminish
     :bind
-    ("C-M-z x d w" . define-word)
-    ("C-M-z x d a" . define-word-at-point))
+    ("C-c x x d w" . define-word)
+    ("C-c x x d a" . define-word-at-point))
 
   (use-package langtool
     :config
@@ -1755,7 +1767,7 @@ A non-free program is a yoke, an instrument of unjust power.
     :diminish
     :defer 3
     :bind (
-           ("C-M-z x E" . elfeed)
+           ("C-c x x E" . elfeed)
            :map elfeed-show-mode-map
            ("m" . elfeed-play-with-mpv)
            )
@@ -1770,8 +1782,10 @@ A non-free program is a yoke, an instrument of unjust power.
             "http://boilingsteam.com/?feed=rss2"
             "https://www.reddit.com/r/emacs/.rss"
             "https://www.reddit.com/r/gnu/.rss"
+            "https://www.reddit.com/r/guile/.rss"
             "https://www.reddit.com/r/C_Programming/.rss"
             "http://feeds.feedburner.com/sachac"
+            "https://wingolog.org/feed/atom"
             "http://planet.emacsen.org/atom.xml"
             "http://nullprogram.com/feed/"
             "http://feeds.feedburner.com/SanityInc"
@@ -1790,18 +1804,11 @@ A non-free program is a yoke, an instrument of unjust power.
             "http://atilanevesoncode.wordpress.com/feed/"
             "http://esr.ibiblio.org/?feed=rss2"
             "http://puri.sm/feed/"
-            "https://www.dsogaming.com/feed/"
-           "https://drewdevault.com/feed.xml"
+            "https://drewdevault.com/feed.xml"
             "http://feeds.feedburner.com/Phoronix"
             "http://lunduke.com/?feed=rss2"
             "http://vista-se.com.br/feed/"
             "http://ultimosegundo.ig.com.br/rss.xml"
-            "https://www.youtube.com/playlist?list=UU-zDnotR6ENxZ8ShVVQOmOg"
-            "https://www.youtube.com/feeds/videos.xml?channel_id=UCkRmQ_G_NbdbCQMpALg6UPg"
-            "https://www.youtube.com/feeds/videos.xml?channel_id=UCH0k3rk6Z0EJuc-xYbmFtNw"
-            "https://www.youtube.com/feeds/videos.xml?channel_id=UCxkMDXQ5qzYOgXPRnOBrp1w"
-            "https://www.youtube.com/playlist?list=UUZMZESEcnKeO6VIQWU5jlZQ"
-            "https://www.youtube.com/playlist?list=UUwXGkzp-kXcvo6XmSWfN6Gg"
             ))
 
     (defun elfeed-play-with-mpv ()
@@ -1858,8 +1865,51 @@ A non-free program is a yoke, an instrument of unjust power.
 ;;   :diminish)
 #+end_src
 
-** Email, Web Browser...
+** Email, IRC Web Browser...
 #+begin_src emacs-lisp :tangle yes
+(use-package erc
+  :ensure nil
+  :defer t
+  :config
+
+  (add-hook 'window-configuration-change-hook
+            '(lambda ()
+               (setq erc-fill-column (- (window-width) 2))))
+  (add-hook 'erc-mode-hook
+            '(lambda ()
+               (setq-local scroll-margin 1)))
+
+  (setq erc-rename-buffers t
+        erc-track-enable-keybindings nil
+        ;; erc-interpret-mirc-color t
+        ;; erc-lurker-hide-list '("JOIN" "PART" "QUIT")
+        erc-autojoin-channels-alist '(("freenode.net" "#emacs" "#guile" "guix")) ;; Join the #emacs channels whenever connecting to Freenode.
+        erc-rename-buffers t ;; Rename server buffers to reflect the current network name instead of SERVER:PORT
+        ))
+
+(use-package erc-hl-nicks)
+
+(use-package rcirc
+  :config
+  (setq rcirc-default-nick "lyr3")
+  (rcirc-track-minor-mode t)
+  (add-hook 'rcirc-mode-hook (lambda ()
+			       (flyspell-mode 1)
+			       (rcirc-omit-mode)
+			       ))
+
+  (setq rcirc-server-alist
+        '(("irc.freenode.net" :channels ("#emacs"))))
+
+  (setq rcirc-authinfo
+        (quote
+         (("irc.freenode.net" nickserv "USERNAME" "PASSWORD"))))
+  (setq rcirc-buffer-maximum-lines 1000)
+  (setq rcirc-default-nick "DEFAULTNICK")
+  (setq rcirc-default-user-name "DEFAULTUSERNAME")
+  (setq rcirc-log-flag t))
+
+
 ;; (use-package notmuch
 ;;   :defer t
 ;;   :diminish  )
@@ -1874,11 +1924,11 @@ A non-free program is a yoke, an instrument of unjust power.
      :defer 2
      :diminish
      :bind
-     ("C-M-z t s" . sudo-edit))
+     ("C-c x t s" . sudo-edit))
 
   (use-package system-packages)
 
-  (use-package vkill)
+  ;; (use-package vkill)
 
 #+end_src
 
@@ -1943,7 +1993,7 @@ A non-free program is a yoke, an instrument of unjust power.
 
 (use-package engine-mode
   :config
-  (engine/set-keymap-prefix (kbd "C-M-z t e"))
+  (engine/set-keymap-prefix (kbd "C-c x t e"))
   (defengine duckduckgo
     "https://duckduckgo.com/?q=%s"
     :keybinding "D"))
@@ -1976,21 +2026,21 @@ A non-free program is a yoke, an instrument of unjust power.
 (use-package crux
   :defer 2
   :diminish
-  ;; :bind (("C-M-z o" . crux-open-with)
+  ;; :bind (("C-c x o" . crux-open-with)
   ;;        ("M-o" . crux-smart-open-line)
-  ;;        ("C-M-z n" . crux-cleanup-buffer-or-region)
-  ;;        ("C-M-z f" . crux-recentf-ido-find-file)
-  ;;        ("C-M-z" . crux-indent-defun)
-  ;;        ("C-M-z u" . crux-view-url)
-  ;;        ("C-M-z e" . crux-eval-and-replace)
-  ;;        ("C-M-z w" . crux-swap-windows)
-  ;;        ("C-M-z D" . crux-delete-file-and-buffer)
-  ;;        ("C-M-z r" . crux-rename-buffer-and-file)
-  ;;        ("C-M-z t" . crux-visit-term-buffer)
-  ;;        ("C-M-z k" . crux-kill-other-buffers)
-  ;;        ("C-M-z TAB" . crux-indent-rigidly-and-copy-to-clipboard)
-  ;;        ("C-M-z I" . crux-find-user-init-file)
-  ;;        ("C-M-z S" . crux-find-shell-init-file)
+  ;;        ("C-c x n" . crux-cleanup-buffer-or-region)
+  ;;        ("C-c x f" . crux-recentf-ido-find-file)
+  ;;        ("C-c x" . crux-indent-defun)
+  ;;        ("C-c x u" . crux-view-url)
+  ;;        ("C-c x e" . crux-eval-and-replace)
+  ;;        ("C-c x w" . crux-swap-windows)
+  ;;        ("C-c x D" . crux-delete-file-and-buffer)
+  ;;        ("C-c x r" . crux-rename-buffer-and-file)
+  ;;        ("C-c x t" . crux-visit-term-buffer)
+  ;;        ("C-c x k" . crux-kill-other-buffers)
+  ;;        ("C-c x TAB" . crux-indent-rigidly-and-copy-to-clipboard)
+  ;;        ("C-c x I" . crux-find-user-init-file)
+  ;;        ("C-c x S" . crux-find-shell-init-file)
   ;;        ("s-r" . crux-recentf-ido-find-file)
   ;;        ("s-j" . crux-top-join-line)
   ;;        ("C-^" . crux-top-join-line)
@@ -2001,7 +2051,7 @@ A non-free program is a yoke, an instrument of unjust power.
   ;;        ([(shift return)] . crux-smart-open-line)
   ;;        ([(control shift return)] . crux-smart-open-line-above)
   ;;        ([remap kill-whole-line] . crux-kill-whole-line)
-  ;;        ("C-M-z s" . crux-ispell-word-then-abbrev))
+  ;;        ("C-c x s" . crux-ispell-word-then-abbrev))
   )
 
 ;; (use-package async
@@ -2035,8 +2085,8 @@ A non-free program is a yoke, an instrument of unjust power.
   :defer 2
   :diminish
   :bind
-  ("C-M-z x r" . restart-emacs)
-  ("C-M-z x R" . restart-emacs-restore-frames))
+  ("C-c x x r" . restart-emacs)
+  ("C-c x x R" . restart-emacs-restore-frames))
 
 (use-package vlf
   :ensure t
@@ -2061,7 +2111,7 @@ A non-free program is a yoke, an instrument of unjust power.
 ;;:defer 2
 ;; :diminish
 ;; :init (persp-mode +1)
-;; :bind ("C-M-z x p" . persp-switch-last)
+;; :bind ("C-c x x p" . persp-switch-last)
 ;; :config
 ;; (setq persp-interactive-completion-function #'ido-completing-read)
 ;; (persp-turn-off-modestring))
@@ -2069,7 +2119,7 @@ A non-free program is a yoke, an instrument of unjust power.
 ;; (use-package persp-projectile
 ;; :defer 2
 ;; :diminish
-;; :bind ("C-M-z x P" . projectile-persp-switch-project))
+;; :bind ("C-c x x P" . projectile-persp-switch-project))
 
 ;; (use-package aria2
 ;;   :diminish)
@@ -2097,13 +2147,13 @@ A non-free program is a yoke, an instrument of unjust power.
   :pin org
   :defer 4
   :diminish org-mode-hook
-  :bind ("C-M-z c" . org-capture)
-  ("C-M-z l" . org-store-link)
-  ("C-M-z a" . org-agenda)
-  ("C-M-z b" . org-switchb)
+  :bind ("C-c x c" . org-capture)
+  ("C-c x l" . org-store-link)
+  ("C-c x a" . org-agenda)
+  ("C-c x b" . org-switchb)
   :config
-  ;; (define-key global-map "\C-M-zl" 'org-store-link)
-  ;; (defbine-key global-map "\C-M-za" 'org-agenda)
+  ;; (define-key global-map "\C-c xl" 'org-store-link)
+  ;; (defbine-key global-map "\C-c xa" 'org-agenda)
   (setq org-log-done t)
   ;; make tab act as if it were issued in a buffer of the language’s major mode.
   (setq org-src-tab-acts-natively t)
@@ -2177,7 +2227,7 @@ A non-free program is a yoke, an instrument of unjust power.
 ;; (setq org-directory "~/org")
 ;; (setq org-special-ctrl-a/e 't)
 ;; (setq org-default-notes-file (concat org-directory "/notes.org"))
-;; (define-key global-map "\C-M-zc" 'org-capture)
+;; (define-key global-map "\C-c xc" 'org-capture)
 ;; (setq org-mobile-directory "~/Dropbox/Apps/MobileOrg")
 ;; (setq org-src-fontify-natively 't)
 ;; (setq org-src-tab-acts-natively t)
@@ -2307,7 +2357,17 @@ A non-free program is a yoke, an instrument of unjust power.
     (add-hook 'irony-mode-hook #'irony-eldoc)))
 
 #+END_SRC
+* Geiser
 
+#+begin_src emacs-lisp :tangle yes
+
+(use-package geiser
+  :config
+  (setq geiser-active-implementations '(guile))
+  (progn
+    (eval-after-load 'scheme-mode
+      '(add-hook 'run-geiser #'scheme-mode))))
+#+end_src
 
 * Defuns:
  One can easily guess that the ability of well integrated custom functions are Emacs greatest virtue.
@@ -2317,7 +2377,7 @@ A non-free program is a yoke, an instrument of unjust power.
   "Download dotfiles from Gitlab, open box.com page"
   (interactive)
   (start-process-shell-command "wget -Nc https://gitlab.com/lyr3/dots/-/archive/master/dots-master.zip -O ~/Downloads/dots.zip" nil "wget -Nc https://gitlab.com/lyr3/dots/-/archive/master/dots-master.zip -O ~/Downloads/dots.zip")
-  (start-process-shell-command "falkon https://account.box.com/login" nil "falkon https://account.box.com/login"))
+  (start-process-shell-command "firefox https://account.box.com/login" nil "firefox https://account.box.com/login"))
 
 (defun hrs/find-file-as-sudo ()
   (interactive)
@@ -2326,19 +2386,34 @@ A non-free program is a yoke, an instrument of unjust power.
       (find-alternate-file (concat "/sudo::" file-name)))))
 
 
+(defun copy-line ()
+  "abo-abo"
+  (interactive)
+  (save-excursion
+    (back-to-indentation)
+    (kill-ring-save
+     (point)
+     (line-end-position)))
+     (message "1 line copied"))
+
+(global-set-key (kbd "C-c x d c") 'copy-line)
+
 (defun hrs/append-to-path (path)
   "Add a path both to the $PATH variable and to Emacs' exec-path."
   (setenv "PATH" (concat (getenv "PATH") ":" path))
   (add-to-list 'exec-path path))
 
 
-;;--------------------------------------------------
+;;------------p--------------------------------------
 (defun def-word ()
   "Find definition of the word at point"
   (interactive)
   (browse-url (concat "https://www.merriam-webster.com/dictionary/" (thing-at-point 'word))))
 
+(global-set-key (kbd "C-c x d w") 'def-word)
+
 ;; Zap to before char - Just like Vi Copy inside delimiters
+
 ;;--------------------------------------------------
 (defun zap-to-before-char (arg char)
   "Kill up to and ARGth occurrence of CHAR.
@@ -2445,7 +2520,7 @@ A non-free program is a yoke, an instrument of unjust power.
 
 ;; Permit yanking text to X11 clipboard; beats the heck out of
 ;; manually copying with the cursor.
-;; (global-set-key (kbd "C-M-z y") 'yank-to-x-clipboard)
+;; (global-set-key (kbd "C-c x y") 'yank-to-x-clipboard)
 
 
 
