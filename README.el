@@ -1,7 +1,7 @@
 (condition-case nil
     (set-frame-font "Profont For Powerline-12")
   (error
-   (set-frame-font "DejaVu Sans Mono-10")))
+   (set-frame-font "Fira Sans Regular-10")))
 
 (setq inhibit-startup-screen t                    ;; Disable startup-screen
       initial-scratch-message ""
