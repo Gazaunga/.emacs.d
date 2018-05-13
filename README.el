@@ -1,7 +1,7 @@
 (condition-case nil
     (set-frame-font "Profont For Powerline-12")
   (error
-   (set-frame-font "Fira Sans Regular-10")))
+   (set-frame-font "DejaVu Sans Mono-10")))
 
 (setq inhibit-startup-screen t                    ;; Disable startup-screen
       initial-scratch-message ""
@@ -37,6 +37,9 @@
       ;; auto-save-file-name-transforms '((".*" "~/.emacs.d/configs/auto-save-list/"
       ;; t))   ;;transform backups file name
       dired-recursive-deletes (quote top)         ;; “top” means ask once
+      dired-dwim-target t
+      dired-recursive-deletes t                   ;; Dired can delete nonempty directories including all their contents
+      dired-hide-details-mode t
       eldoc-idle-delay 0.1                        ;; eldoc-mode
       eldoc-echo-area-use-multiline-p nil         ;; eldoc-mode
       ;; text-scale-mode-step 0.8
@@ -60,8 +63,6 @@
       apropos-sort-by-scores t                    ;; sort results by relevancy
       ediff-diff-options "-w"                     ;; A saner ediff
       delete-by-moving-to-trash t                 ;; affected files or directories into the operating system's Trash, instead of deleting them outright
-      dire-recursive-deletes t                   ;; Dired can delete nonempty directories including all their contents
-      dired-hide-details-mode t
       ediff-split-window-function 'split-window-horizontally
       ediff-window-setup-function 'ediff-setup-windows-plain
       ;; split-width-threshold nil                   ;; never split the window (nice for rtags and compile errors).
@@ -75,7 +76,7 @@
 (defalias 'yes-or-no-p 'y-or-n-p)                 ;; Don't make me type 'yes' or 'no', y/n will do
 
 (setq-default  indent-tabs-mode nil                ;; use space to indent by default
-               ;; dired-listing-switches "-laGh1v --group-directories-first"       ;; Add file sizes in human-readable units (KB, MB, etc) to dired buffers.
+               dired-listing-switches "-laGh1v --group-directories-first"       ;; Add file sizes in human-readable units (KB, MB, etc) to dired buffers.
                ;; tab-width 4                         ;; set appearance of a tab that is represented by 4 spaces
 
                ;; fill-column 80                      ;; Set the default line length to LINE-LENGTH.
@@ -156,6 +157,8 @@
               (lambda () (interactive) (find-alternate-file "..")))
                                         ; was dired-up-directory
             ))
+
+
 
 (use-package recentf
   :ensure nil
@@ -250,13 +253,21 @@
   :defer 2
   :diminish
   :config
-  (setq dired-open-extensions
+  (setq dired-collapse-mode t
+        dired-open-extensions
         '(("pdf" . "firefox")
                                         ;("ogg" . "mpv")
           ("ogv" . "mpv")
           ("mkv" . "mpv")
           ("mp4" . "mpv")
           ("avi" . "mpv"))))
+
+(use-package dired-collapse
+  :config
+  (setq dired-collapse-mode t))
+
+(use-package dired-quick-sort
+  :config (dired-quick-sort-setup))
 
 ;; (use-package stripe-buffer              ; Add stripes to a buffer
 ;;   :init (add-hook 'dired-mode-hook #'stripe-buffer-mode))
@@ -323,48 +334,65 @@
   :init
   (which-key-mode))
 
+(use-package hydra
+  :config
+
+  (defhydra hydra-zoom (global-map "C-c x h")
+    "zoom"
+    ("e" enlarge-window "Enlarge Window")
+    ("E" enlarge-window-horizontally "Enlarge Window Horizontally"))
+
+  (defhydra hydra-launcher (:color blue)
+    "Launch"
+    ("h" man "man")
+    ("r" (browse-url "http://www.reddit.com/r/emacs/") "reddit")
+    ("w" (browse-url "http://www.emacswiki.org/") "emacswiki")
+    ("s" shell "shell")
+    ("q" nil "cancel"))
+  (global-set-key (kbd "C-c x r") 'hydra-launcher/body))
+
 ;;; Custom prefixes
 (eval-and-compile
   (mapc #'(lambda (entry)
             (define-prefix-command (cdr entry))
             (bind-key (car entry) (cdr entry)))
         '(
-          ("C-c b" . Bultin)
-          ("C-c @" . Hs)
-          ("C-c x d" . DefineWord)
-          ("C-c d" . Devel)
-          ("C-c g" . Goto-last)
-          ("C-c g" . Goto-last)
-          ("C-c e" . Move-text)
-          ("C-c s" . Smartparens)
-          ;; ("C-c S" . Spell)
-          ("C-c x" . Apps)
-          ("C-c x e" . Emms)
-          ("C-c o" . OraFunctions)
-          ("C-c f" . CustomDefun)
-          ("C-c y" . Yasnippet)
-          ("C-c h" . Hydra)
-          ("C-c u" . Url)
-          ("C-c t" . Tools)
-          ("C-c t d" . Dumb-Jump)
+          ("C-c x b" . Bultin)
+          ("C-c x @" . Hs)
+          ("C-c x x d" . DefineWord)
+          ("C-c x d" . Devel)
+          ("C-c x g" . Goto-last)
+          ("C-c x g" . Goto-last)
+          ("C-c x e" . Move-text)
+          ("C-c x s" . Smartparens)
+          ;; ("C-c x S" . Spell)
+          ("C-c x x" . Apps)
+          ("C-c x x e" . Emms)
+          ("C-c x o" . OraFunctions)
+          ("C-c x f" . CustomDefun)
+          ("C-c x y" . Yasnippet)
+          ("C-c x h" . Hydra)
+          ("C-c x u" . Url)
+          ("C-c x t" . Tools)
+          ("C-c x t d" . Dumb-Jump)
           ;; ("C-,"   . my-ctrl-comma-map)
           ;; ("<C-m>" . my-ctrl-m-map)
           )))
 
 (bind-keys
  ;; Bultin
- ("C-c b a" . ansi-term)
- ("C-c b s" . shell)
- ("C-c b e" . eshell)
- ("C-c b v" . eval-buffer)
- ("C-c b k" . kill-buffer-and-window)
+ ("C-c x b a" . ansi-term)
+ ("C-c x b s" . shell)
+ ("C-c x b e" . eshell)
+ ("C-c x b v" . eval-buffer)
+ ("C-c x b k" . kill-buffer-and-window)
  ("C-x K" . kill-this-buffer)
 
  ;; Custom defuns
- ("C-c f d" . xah-delete-current-file-make-backup)
+ ("C-c x f d" . xah-delete-current-file-make-backup)
 
  ;; Orafunctions
- ("C-c o w" . ora-open-wikipedia)
+ ("C-c x o w" . ora-open-wikipedia)
 
  ;; use hippie-expand instead of dabbrev
  ("M-/" . hippie-expand)
@@ -375,10 +403,10 @@
 ;; (define-key dired-mode-map (kbd "^") (lambda () (interactive) (find-alternate-file "..")))  ; was dired-up-directory
 
 ;; Moving through windows
-;; (global-set-key (kbd "C-c w p") 'windmove-up)
-;; (global-set-key (kbd "C-c w n") 'windmove-down)
-;; (global-set-key (kbd "C-c w f") 'windmove-right)
-;; (global-set-key (kbd "C-c w b") 'windmove-left)
+;; (global-set-key (kbd "C-c x w p") 'windmove-up)
+;; (global-set-key (kbd "C-c x w n") 'windmove-down)
+;; (global-set-key (kbd "C-c x w f") 'windmove-right)
+;; (global-set-key (kbd "C-c x w b") 'windmove-left)
 
 (use-package gruvbox-theme
   :config (load-theme 'gruvbox-dark-soft t))
@@ -561,6 +589,10 @@
   (interactive)
   (start-process-shell-command "killall pulseaudio & pulseaudio &" nil "killall pulseaudio & pulseaudio &"))
 
+(defun popcorn ()
+  (interactive)
+  (start-process-shell-command "cd ~/Temps/pop/ || exit && ./Popcorn-Time" nil "cd ~/Temps/pop/ || exit && ./Popcorn-Time"))
+
 (defun background-shell-command (command)
   (interactive (list (read-shell-command "$ ")))
   (with-temp-buffer
@@ -570,7 +602,7 @@
   "Open some few apps in specific workspaces"
   (interactive)
   ;; (exwm-workspace-switch 1)
-  (start-process-shell-command "falkon" nil "falkon")
+  (start-process-shell-command "iceweasel" nil "iceweasel")
   ;; (sleep-for 2)
   ;; (exwm-workspace-switch 3)
   (start-process-shell-command "steam" nil "steam"))
@@ -623,6 +655,7 @@
 ;; (exwm-input-set-key (kbd "s-K") 'kill-this-buffer)
 
 ;; [TERM]
+(exwm-input-set-key (kbd "s-v") 'multi-term)
 (exwm-input-set-key (kbd "s-V") 'eshell)
 
 ;; [WINDOWS]
@@ -648,7 +681,7 @@
 (exwm-input-set-key (kbd "s-E") 'emms-smart-browse)
 (exwm-input-set-key (kbd "s-SPC") 'emms-pause)
 
-;;; Pulseaudio
+  ;;; Pulseaudio
 (when (require 'pulseaudio-control nil t)
   (exwm-input-set-key (kbd "s-w") 'pulseaudio-control-increase-volume)
   (exwm-input-set-key (kbd "s-s") 'pulseaudio-control-decrease-volume)
@@ -672,10 +705,10 @@
                       (interactive)
                       (start-process-shell-command "slock" nil "slock")))
 
-(exwm-input-set-key (kbd "s-v")
-                    (lambda ()
-                      (interactive)
-                      (start-process-shell-command "st" nil "st")))
+;; (exwm-input-set-key (kbd "s-v")
+;;                     (lambda ()
+;;                       (interactive)
+;;                       (start-process-shell-command "st" nil "st")))
 
 
 ;; Scrot
@@ -717,7 +750,7 @@
 ;; The following example demonstrates how to set a key binding only available
 ;; in line mode. It's simply done by first push the prefix key to
 ;; ;; `exwm-input-prefix-keys' and then add the key sequence to `exwm-mode-map'.
-;; ;; The example shorten 'C-c q' to 'C-q'.
+;; ;; The example shorten 'C-c x q' to 'C-q'.
 ;; (push ?\C-q exwm-input-prefix-keys)
 ;; (define-key exwm-mode-map [?\C-q] 'exwm-input-send-next-key)
 ;; ;; M-m leader, sorry Space Folks
@@ -736,9 +769,9 @@
 ;; (push ?\C-7 exwm-input-prefix-keys)
 ;; (push ?\C-8 exwm-input-prefix-keys)
 ;; (push ?\C-9 exwm-input-prefix-keys)
-;; ;; C-c, C-x are needed for copying and pasting
+;; ;; C-c x, C-x are needed for copying and pasting
 ;; (delete ?\C-x exwm-input-prefix-keys)
-;; (delete ?\C-c exwm-input-prefix-keys)
+;; (delete ?\C-c x exwm-input-prefix-keys)
 ;; ;; We can use `M-m h' to access help
 ;; (delete ?\C-h exwm-input-prefix-keys)
 
@@ -754,7 +787,7 @@
         company-minimum-prefix-length 2
         company-tooltip-limit 20)
   :bind
-  ("C-c y c" . company-files))
+  ("C-c x y c" . company-files))
 
 (use-package company-quickhelp
   :diminish company-quickhelp-mode
@@ -764,7 +797,7 @@
 
 (with-eval-after-load 'company
   (company-quickhelp-mode)
-  (define-key company-active-map (kbd "C-c c q") #'company-quickhelp-manual-begin))
+  (define-key company-active-map (kbd "C-c x c q") #'company-quickhelp-manual-begin))
 
 (use-package company-shell
   :diminish company-shell-modes
@@ -831,7 +864,7 @@
 (use-package yasnippet
   :diminish yas-minor-mode
   :bind
-  ("C-c y y" . yas-expand)
+  ("C-c x y y" . yas-expand)
   (:map yas-minor-mode-map
         ("TAB" . nil)
         ("<tab>" . nil))
@@ -864,9 +897,9 @@
   :defer 2
   :after yasnippet
   :commands (aya-create aya-open-line)
-  :bind (("C-c y a" . aya-create)
-         ("C-c y e" . aya-expand)
-         ("C-c y o" . aya-open-line)))
+  :bind (("C-c x y a" . aya-create)
+         ("C-c x y e" . aya-expand)
+         ("C-c x y o" . aya-open-line)))
 
 (use-package flycheck
   :diminish flycheck-mode
@@ -942,40 +975,41 @@
   :hook
   (org-mode . smartparens-strict-mode)
   (prog-mode . smartparens-strict-mode)
+  (scheme-mode . smartparens-strict-mode)
   :config
   (progn
     (show-smartparens-global-mode t))
   :bind
-  ("C-c s f o" . sp-forward-sexp)
-  ("C-c s B" . sp-backward-sexp)
-  ("C-c s b u" . sp-backward-up-sexp)
-  ("C-c s b d" . sp-backward-down-sexp)
-  ("C-c s b e" . sp-beginning-of-sexp)
-  ("C-c s e n" . sp-end-of-sexp)
-  ("C-c s d o" . sp-down-sexp)
-  ("C-c s u p" . sp-up-sexp)
-  ("C-c s n" . sp-next-sexp)
-  ("C-c s p" . sp-previous-sexp)
-  ("C-c s k" . sp-kill-sexp)
-  ("C-c s c" . sp-copy-sexp)
-  ("C-c s u n" . sp-unwrap-sexp)
-  ("C-c s u b" . sp-backward-unwrap-sexp)
-  ("C-c s f s" . sp-forward-slurp-sexp)
-  ("C-c s f b" . sp-forward-barf-sexp)
-  ("C-c s b s" . sp-backward-slurp-sexp)
-  ("C-c s b b" . sp-backward-barf-sexp)
-  ("C-c s s p" . sp-splice-sexp)
-  ("C-c s s b" . sp-splice-sexp-killing-backward)
-  ("C-c s s k" . sp-splice-sexp-killing-around)
-  ("C-c s s n e" . sp-select-next-thing-exchange)
-  ("C-c s s n t" . sp-select-next-thing)
-  ("C-c s m" . sp-mark-sexp)
-  ("C-c s f S" . sp-forward-symbol)
-  ("C-c s b S" . sp-backward-symbol))
+  ("C-c x s f o" . sp-forward-sexp)
+  ("C-c x s B" . sp-backward-sexp)
+  ("C-c x s b u" . sp-backward-up-sexp)
+  ("C-c x s b d" . sp-backward-down-sexp)
+  ("C-c x s b e" . sp-beginning-of-sexp)
+  ("C-c x s e n" . sp-end-of-sexp)
+  ("C-c x s d o" . sp-down-sexp)
+  ("C-c x s u p" . sp-up-sexp)
+  ("C-c x s n" . sp-next-sexp)
+  ("C-c x s p" . sp-previous-sexp)
+  ("C-c x s k" . sp-kill-sexp)
+  ("C-c x s c" . sp-copy-sexp)
+  ("C-c x s u n" . sp-unwrap-sexp)
+  ("C-c x s u b" . sp-backward-unwrap-sexp)
+  ("C-c x s f s" . sp-forward-slurp-sexp)
+  ("C-c x s f b" . sp-forward-barf-sexp)
+  ("C-c x s b s" . sp-backward-slurp-sexp)
+  ("C-c x s b b" . sp-backward-barf-sexp)
+  ("C-c x s s p" . sp-splice-sexp)
+  ("C-c x s s b" . sp-splice-sexp-killing-backward)
+  ("C-c x s s k" . sp-splice-sexp-killing-around)
+  ("C-c x s s n e" . sp-select-next-thing-exchange)
+  ("C-c x s s n t" . sp-select-next-thing)
+  ("C-c x s m" . sp-mark-sexp)
+  ("C-c x s f S" . sp-forward-symbol)
+  ("C-c x s b S" . sp-backward-symbol))
 
 (use-package emacs-surround
   :ensure nil
-  :bind ("C-c d q" . emacs-surround))
+  :bind ("C-c x d q" . emacs-surround))
 
 (use-package rainbow-delimiters
   :diminish rainbow-delimiters-mode
@@ -1019,8 +1053,8 @@
 
 (use-package move-text
   :bind
-  ("C-c d m u" . move-text-bup)
-  ("C-c d m d" . move-text-down))
+  ("C-c x d m u" . move-text-bup)
+  ("C-c x d m d" . move-text-down))
 
 (use-package anzu
   :diminish anzu-mode
@@ -1031,15 +1065,15 @@
 
 (use-package goto-chg
   :bind
-  ("C-c d g a" . goto-last-change)
-  ("C-c d g r" . goto-last-change-reverse))
+  ("C-c x d g a" . goto-last-change)
+  ("C-c x d g r" . goto-last-change-reverse))
 
 ;; (use-package origami
 ;;   :diminish origami-mode
 ;;   :after (dash s)
 ;;   :commands global-origami-mode
 ;;   :init (global-origami-mode t)
-;;   :bind ("C-c d o" . origami-toggle-node))
+;;   :bind ("C-c x d o" . origami-toggle-node))
 
 ;; (use-package vimish-fold
 ;;   :defer 1
@@ -1073,7 +1107,7 @@
   ("C-=" . er/expand-region))
 
 (use-package mark-multiple
-  :bind ("C-c d n" . 'mark-next-like-this))
+  :bind ("C-c x d n" . 'mark-next-like-this))
 
 (use-package multiple-cursors
   :defer 2
@@ -1094,7 +1128,7 @@
 
 (use-package zzz-to-char
   :ensure t
-  :bind ("C-c d z" . zzz-up-to-char))
+  :bind ("C-c x d z" . zzz-up-to-char))
 
 (use-package zop-to-char
   :defer 2
@@ -1104,9 +1138,9 @@
 (use-package dumb-jump
   :defer 2
   :diminish dumb-jump-mode
-  :bind (("C-c t d g" . dumb-jump-go)
-         ("C-c t d b" . dumb-jump-back)
-         ("C-c t d q" . dumb-jump-quick-look)))
+  :bind (("C-c x t d g" . dumb-jump-go)
+         ("C-c x t d b" . dumb-jump-back)
+         ("C-c x t d q" . dumb-jump-quick-look)))
 
 (use-package focus
   :defer 2
@@ -1144,7 +1178,7 @@
   :diminish counsel-mode
   :bind (("M-x" . counsel-M-x)
          ("M-y" . counsel-yank-pop)
-         ;; ("C-c b r" . counsel-recentf)
+         ;; ("C-c x b r" . counsel-recentf)
          ;; ("C-x C-f" . counsel-find-file)
          ;; ("<f1> f" . counsel-describe-function)
          ;; ("<f1> v" . counsel-describe-variable)
@@ -1160,7 +1194,7 @@
 (use-package swiper
   :diminish
   :bind (("C-s" . swiper)
-         ;; ("C-c C-r" . ivy-resume)
+         ;; ("C-c x C-r" . ivy-resume)
          )
   :config
   (progn
@@ -1368,9 +1402,9 @@
 ;;        (treemacs-git-mode 'simple))))
 ;;   :bind
 ;;   (:map global-map
-;;         ("C-c x t t"      . treemacs-toggle)
-;;         ("C-c x t s"      . treemacs-select-window)
-;;         ("C-c x t d"      . treemacs-delete-other-windows)
+;;         ("C-c x x t t"      . treemacs-toggle)
+;;         ("C-c x x t s"      . treemacs-select-window)
+;;         ("C-c x x t d"      . treemacs-delete-other-windows)
 ;;         ;; ("M-m ft"     . treemacs-toggle)
 ;;         ;; ("M-m fT"     . treemacs)
 ;;         ;; ("M-m fB"     . treemacs-bookmark)
@@ -1405,16 +1439,16 @@
 (use-package emms
   :diminish
   :bind
-  ("C-c x e a" . emms)
-  ("C-c x e b" . emms-smart-browse)
-  ("C-c x e u" . emms-player-mpd-update-all-reset-cache)
-  ("C-c x e c" . emms-playlist-clear)
-  ("C-c x e S" . emms-start)
-  ("C-c x e r" . emms-toggle-repeat-track)
-  ("C-c x e p" . emms-previous)
-  ("C-c x e n" . emms-next)
-  ("C-c x e P" . emms-pause)
-  ("C-c x e U" . mpd-update-database)
+  ("C-c x x e a" . emms)
+  ("C-c x x e b" . emms-smart-browse)
+  ("C-c x x e u" . emms-player-mpd-update-all-reset-cache)
+  ("C-c x x e c" . emms-playlist-clear)
+  ("C-c x x e S" . emms-start)
+  ("C-c x x e r" . emms-toggle-repeat-track)
+  ("C-c x x e p" . emms-previous)
+  ("C-c x x e n" . emms-next)
+  ("C-c x x e P" . emms-pause)
+  ("C-c x x e U" . mpd-update-database)
   :init
   (add-hook 'after-init-hook #'mpd-start-music-daemon)
   :config
@@ -1434,11 +1468,11 @@
         emms-browser-covers 'emms-browser-cache-thumbnail
         emms-player-mpd-server-name "localhost"
         emms-player-mpd-server-port "6600" ;; Setting the default port
-        ;; mpc-host "localhost:6600"
+        mpc-host "localhost:6600"
         emms-source-file-default-directory "~/Music/"
         ))
 
-(use-package helm-emms)
+;; (use-package helm-emms)
 
 ;; (use-package emms-mode-line-cycle
 ;;   :config
@@ -1516,7 +1550,7 @@
 (use-package writegood-mode
   :defer 4
   :diminish writegood-mode
-  :bind ("C-c g" . writegood-mode)
+  :bind ("C-c x g" . writegood-mode)
   :config
   (add-to-list 'writegood-weasel-words "actionable"))
 
@@ -1531,8 +1565,8 @@
   :defer 4
   :diminish
   :bind
-  ("C-c x d w" . define-word)
-  ("C-c x d a" . define-word-at-point))
+  ("C-c x x d w" . define-word)
+  ("C-c x x d a" . define-word-at-point))
 
 (use-package langtool
   :config
@@ -1544,7 +1578,7 @@
   :diminish
   :defer 3
   :bind (
-         ("C-c x E" . elfeed)
+         ("C-c x x E" . elfeed)
          :map elfeed-show-mode-map
          ("m" . elfeed-play-with-mpv)
          )
@@ -1559,8 +1593,10 @@
           "http://boilingsteam.com/?feed=rss2"
           "https://www.reddit.com/r/emacs/.rss"
           "https://www.reddit.com/r/gnu/.rss"
+          "https://www.reddit.com/r/guile/.rss"
           "https://www.reddit.com/r/C_Programming/.rss"
           "http://feeds.feedburner.com/sachac"
+          "https://wingolog.org/feed/atom"
           "http://planet.emacsen.org/atom.xml"
           "http://nullprogram.com/feed/"
           "http://feeds.feedburner.com/SanityInc"
@@ -1584,12 +1620,6 @@
           "http://lunduke.com/?feed=rss2"
           "http://vista-se.com.br/feed/"
           "http://ultimosegundo.ig.com.br/rss.xml"
-          "https://www.youtube.com/playlist?list=UU-zDnotR6ENxZ8ShVVQOmOg"
-          "https://www.youtube.com/feeds/videos.xml?channel_id=UCkRmQ_G_NbdbCQMpALg6UPg"
-          "https://www.youtube.com/feeds/videos.xml?channel_id=UCH0k3rk6Z0EJuc-xYbmFtNw"
-          "https://www.youtube.com/feeds/videos.xml?channel_id=UCxkMDXQ5qzYOgXPRnOBrp1w"
-          "https://www.youtube.com/playlist?list=UUZMZESEcnKeO6VIQWU5jlZQ"
-          "https://www.youtube.com/playlist?list=UUwXGkzp-kXcvo6XmSWfN6Gg"
           ))
 
   (defun elfeed-play-with-mpv ()
@@ -1642,6 +1672,49 @@
 ;;   :defer t
 ;;   :diminish)
 
+(use-package erc
+  :ensure nil
+  :defer t
+  :config
+
+  (add-hook 'window-configuration-change-hook
+            '(lambda ()
+               (setq erc-fill-column (- (window-width) 2))))
+  (add-hook 'erc-mode-hook
+            '(lambda ()
+               (setq-local scroll-margin 1)))
+
+  (setq erc-rename-buffers t
+        erc-track-enable-keybindings nil
+        ;; erc-interpret-mirc-color t
+        ;; erc-lurker-hide-list '("JOIN" "PART" "QUIT")
+        erc-autojoin-channels-alist '(("freenode.net" "#emacs" "#guile" "guix")) ;; Join the #emacs channels whenever connecting to Freenode.
+        erc-rename-buffers t ;; Rename server buffers to reflect the current network name instead of SERVER:PORT
+        ))
+
+(use-package erc-hl-nicks)
+
+(use-package rcirc
+  :config
+  (setq rcirc-default-nick "lyr3")
+  (rcirc-track-minor-mode t)
+  (add-hook 'rcirc-mode-hook (lambda ()
+			       (flyspell-mode 1)
+			       (rcirc-omit-mode)
+			       ))
+
+  (setq rcirc-server-alist
+        '(("irc.freenode.net" :channels ("#emacs"))))
+
+  (setq rcirc-authinfo
+        (quote
+         (("irc.freenode.net" nickserv "USERNAME" "PASSWORD"))))
+  (setq rcirc-buffer-maximum-lines 1000)
+  (setq rcirc-default-nick "DEFAULTNICK")
+  (setq rcirc-default-user-name "DEFAULTUSERNAME")
+  (setq rcirc-log-flag t))
+
+
 ;; (use-package notmuch
 ;;   :defer t
 ;;   :diminish  )
@@ -1654,11 +1727,11 @@
    :defer 2
    :diminish
    :bind
-   ("C-c t s" . sudo-edit))
+   ("C-c x t s" . sudo-edit))
 
 (use-package system-packages)
 
-(use-package vkill)
+;; (use-package vkill)
 
 (use-package ripgrep
   :defer 2
@@ -1685,6 +1758,14 @@
 ;; Search init file for bugs
 (use-package bug-hunter)
 
+;; always comnnpile packages, and use the newest version available.
+(use-package auto-compile
+  :diminish auto-compile-mode
+  :config
+  (auto-compile-on-load-mode)
+  (setq load-prefer-newer t))
+
+
 (use-package shackle
   :diminish shackle-mode
   :init (shackle-mode 1)
@@ -1708,7 +1789,7 @@
 
 (use-package engine-mode
   :config
-  (engine/set-keymap-prefix (kbd "C-c t e"))
+  (engine/set-keymap-prefix (kbd "C-c x t e"))
   (defengine duckduckgo
     "https://duckduckgo.com/?q=%s"
     :keybinding "D"))
@@ -1741,21 +1822,21 @@
 (use-package crux
   :defer 2
   :diminish
-  ;; :bind (("C-c o" . crux-open-with)
+  ;; :bind (("C-c x o" . crux-open-with)
   ;;        ("M-o" . crux-smart-open-line)
-  ;;        ("C-c n" . crux-cleanup-buffer-or-region)
-  ;;        ("C-c f" . crux-recentf-ido-find-file)
-  ;;        ("C-M-z" . crux-indent-defun)
-  ;;        ("C-c u" . crux-view-url)
-  ;;        ("C-c e" . crux-eval-and-replace)
-  ;;        ("C-c w" . crux-swap-windows)
-  ;;        ("C-c D" . crux-delete-file-and-buffer)
-  ;;        ("C-c r" . crux-rename-buffer-and-file)
-  ;;        ("C-c t" . crux-visit-term-buffer)
-  ;;        ("C-c k" . crux-kill-other-buffers)
-  ;;        ("C-c TAB" . crux-indent-rigidly-and-copy-to-clipboard)
-  ;;        ("C-c I" . crux-find-user-init-file)
-  ;;        ("C-c S" . crux-find-shell-init-file)
+  ;;        ("C-c x n" . crux-cleanup-buffer-or-region)
+  ;;        ("C-c x f" . crux-recentf-ido-find-file)
+  ;;        ("C-c x" . crux-indent-defun)
+  ;;        ("C-c x u" . crux-view-url)
+  ;;        ("C-c x e" . crux-eval-and-replace)
+  ;;        ("C-c x w" . crux-swap-windows)
+  ;;        ("C-c x D" . crux-delete-file-and-buffer)
+  ;;        ("C-c x r" . crux-rename-buffer-and-file)
+  ;;        ("C-c x t" . crux-visit-term-buffer)
+  ;;        ("C-c x k" . crux-kill-other-buffers)
+  ;;        ("C-c x TAB" . crux-indent-rigidly-and-copy-to-clipboard)
+  ;;        ("C-c x I" . crux-find-user-init-file)
+  ;;        ("C-c x S" . crux-find-shell-init-file)
   ;;        ("s-r" . crux-recentf-ido-find-file)
   ;;        ("s-j" . crux-top-join-line)
   ;;        ("C-^" . crux-top-join-line)
@@ -1766,7 +1847,7 @@
   ;;        ([(shift return)] . crux-smart-open-line)
   ;;        ([(control shift return)] . crux-smart-open-line-above)
   ;;        ([remap kill-whole-line] . crux-kill-whole-line)
-  ;;        ("C-c s" . crux-ispell-word-then-abbrev))
+  ;;        ("C-c x s" . crux-ispell-word-then-abbrev))
   )
 
 ;; (use-package async
@@ -1792,15 +1873,16 @@
 (use-package auto-package-update
   :defer 4
   :diminish auto-package-update-minor-mode
-  :init (auto-package-update-maybe)
-  :config (auto-package-update-at-time "09:00"))
+  ;; :init (auto-package-update-maybe)
+  ;; :config (auto-package-update-at-time "09:00")
+  )
 
 (use-package restart-emacs
   :defer 2
   :diminish
   :bind
-  ("C-c x r" . restart-emacs)
-  ("C-c x R" . restart-emacs-restore-frames))
+  ("C-c x x r" . restart-emacs)
+  ("C-c x x R" . restart-emacs-restore-frames))
 
 (use-package vlf
   :ensure t
@@ -1825,7 +1907,7 @@
 ;;:defer 2
 ;; :diminish
 ;; :init (persp-mode +1)
-;; :bind ("C-c x p" . persp-switch-last)
+;; :bind ("C-c x x p" . persp-switch-last)
 ;; :config
 ;; (setq persp-interactive-completion-function #'ido-completing-read)
 ;; (persp-turn-off-modestring))
@@ -1833,7 +1915,7 @@
 ;; (use-package persp-projectile
 ;; :defer 2
 ;; :diminish
-;; :bind ("C-c x P" . projectile-persp-switch-project))
+;; :bind ("C-c x x P" . projectile-persp-switch-project))
 
 ;; (use-package aria2
 ;;   :diminish)
@@ -1853,13 +1935,13 @@
   :pin org
   :defer 4
   :diminish org-mode-hook
-  :bind ("C-c c" . org-capture)
-  ("C-c l" . org-store-link)
-  ("C-c a" . org-agenda)
-  ("C-c b" . org-switchb)
+  :bind ("C-c x c" . org-capture)
+  ("C-c x l" . org-store-link)
+  ("C-c x a" . org-agenda)
+  ("C-c x b" . org-switchb)
   :config
-  ;; (define-key global-map "\C-cl" 'org-store-link)
-  ;; (defbine-key global-map "\C-ca" 'org-agenda)
+  ;; (define-key global-map "\C-c xl" 'org-store-link)
+  ;; (defbine-key global-map "\C-c xa" 'org-agenda)
   (setq org-log-done t)
   ;; make tab act as if it were issued in a buffer of the language’s major mode.
   (setq org-src-tab-acts-natively t)
@@ -1933,7 +2015,7 @@
 ;; (setq org-directory "~/org")
 ;; (setq org-special-ctrl-a/e 't)
 ;; (setq org-default-notes-file (concat org-directory "/notes.org"))
-;; (define-key global-map "\C-cc" 'org-capture)
+;; (define-key global-map "\C-c xc" 'org-capture)
 ;; (setq org-mobile-directory "~/Dropbox/Apps/MobileOrg")
 ;; (setq org-src-fontify-natively 't)
 ;; (setq org-src-tab-acts-natively t)
@@ -2045,11 +2127,18 @@
   (progn
     (add-hook 'irony-mode-hook #'irony-eldoc)))
 
+(use-package geiser
+  :config
+  (setq geiser-active-implementations '(guile))
+  (progn
+    (eval-after-load 'scheme-mode
+      '(add-hook 'run-geiser #'scheme-mode))))
+
 (defun get-dotfiles-open-box ()
   "Download dotfiles from Gitlab, open box.com page"
   (interactive)
   (start-process-shell-command "wget -Nc https://gitlab.com/lyr3/dots/-/archive/master/dots-master.zip -O ~/Downloads/dots.zip" nil "wget -Nc https://gitlab.com/lyr3/dots/-/archive/master/dots-master.zip -O ~/Downloads/dots.zip")
-  (start-process-shell-command "falkon https://account.box.com/login" nil "falkon https://account.box.com/login"))
+  (start-process-shell-command "firefox https://account.box.com/login" nil "firefox https://account.box.com/login"))
 
 (defun hrs/find-file-as-sudo ()
   (interactive)
@@ -2058,19 +2147,34 @@
       (find-alternate-file (concat "/sudo::" file-name)))))
 
 
+(defun copy-line ()
+  "abo-abo"
+  (interactive)
+  (save-excursion
+    (back-to-indentation)
+    (kill-ring-save
+     (point)
+     (line-end-position)))
+     (message "1 line copied"))
+
+(global-set-key (kbd "C-c x d c") 'copy-line)
+
 (defun hrs/append-to-path (path)
   "Add a path both to the $PATH variable and to Emacs' exec-path."
   (setenv "PATH" (concat (getenv "PATH") ":" path))
   (add-to-list 'exec-path path))
 
 
-;;--------------------------------------------------
+;;------------p--------------------------------------
 (defun def-word ()
   "Find definition of the word at point"
   (interactive)
   (browse-url (concat "https://www.merriam-webster.com/dictionary/" (thing-at-point 'word))))
 
+(global-set-key (kbd "C-c x d w") 'def-word)
+
 ;; Zap to before char - Just like Vi Copy inside delimiters
+
 ;;--------------------------------------------------
 (defun zap-to-before-char (arg char)
   "Kill up to and ARGth occurrence of CHAR.
@@ -2177,7 +2281,7 @@
 
 ;; Permit yanking text to X11 clipboard; beats the heck out of
 ;; manually copying with the cursor.
-;; (global-set-key (kbd "C-c y") 'yank-to-x-clipboard)
+;; (global-set-key (kbd "C-c x y") 'yank-to-x-clipboard)
 
 ;; Improved version of org narrow block. It loads a temporary file in the given major mode
 ;;--------------------------------------------------
@@ -2232,6 +2336,26 @@
     (delete-region $p1 $p2)
     (insert (concat "<a href=\"" (url-encode-url $new-str) "\">" $new-str "</a>" ))))
 
+
+;; --------------------------------------------------
+
+(defun xah-dired-sort ()
+  "Sort dired dir listing in different ways.
+Prompt for a choice.
+URL `http://ergoemacs.org/emacs/dired_sort.html'
+Version 2015-07-30"
+  (interactive)
+  (let ($sort-by $arg)
+    (setq $sort-by (ido-completing-read "Sort by:" '( "date" "size" "name" "dir")))
+    (cond
+     ((equal $sort-by "name") (setq $arg "-Al --si --time-style long-iso "))
+     ((equal $sort-by "date") (setq $arg "-Al --si --time-style long-iso -t"))
+     ((equal $sort-by "size") (setq $arg "-Al --si --time-style long-iso -S"))
+     ((equal $sort-by "dir") (setq $arg "-Al --si --time-style long-iso --group-directories-first"))
+     (t (error "logic error 09535" )))
+    (dired-sort-other $arg )))
+
+(define-key dired-mode-map (kbd "s") 'xah-dired-sort)
 
 ;;--------------------------------------------------
 (defun xah-delete-current-file-make-backup (&optional @no-backup-p)
