@@ -541,6 +541,7 @@ A non-free program is a yoke, an instrument of unjust power.
            spaceline-line-p t
            powerline-default-separator nil
            spaceline-buffer-encoding-abbrev-p nil
+           spaceline-erc-track-p nil
            spaceline-buffer-size-p nil
            spaceline-which-function-p t
            spaceline-buffer-modified-p nil
@@ -1778,6 +1779,7 @@ A non-free program is a yoke, an instrument of unjust power.
     (setq elfeed-feeds
           '("https://www.fsf.org/static/fsforg/rss/blogs.xml"
             "https://www.fsf.org/static/fsforg/rss/news.xml"
+            "https://www.gnu.org/software/guix/news/feed.xml"
             "planet.gnu.org/rss20.xml"
             "http://boilingsteam.com/?feed=rss2"
             "https://www.reddit.com/r/emacs/.rss"
@@ -1883,7 +1885,7 @@ A non-free program is a yoke, an instrument of unjust power.
         erc-track-enable-keybindings nil
         ;; erc-interpret-mirc-color t
         ;; erc-lurker-hide-list '("JOIN" "PART" "QUIT")
-        erc-autojoin-channels-alist '(("freenode.net" "#emacs" "#guile" "guix")) ;; Join the #emacs channels whenever connecting to Freenode.
+        erc-autojoin-channels-alist '(("freenode.net" "#emacs" "#guile" "#guix")) ;; Join the #emacs channels whenever connecting to Freenode.
         erc-rename-buffers t ;; Rename server buffers to reflect the current network name instead of SERVER:PORT
         ))
 
@@ -2376,7 +2378,7 @@ A non-free program is a yoke, an instrument of unjust power.
 (defun get-dotfiles-open-box ()
   "Download dotfiles from Gitlab, open box.com page"
   (interactive)
-  (start-process-shell-command "wget -Nc https://gitlab.com/lyr3/dots/-/archive/master/dots-master.zip -O ~/Downloads/dots.zip" nil "wget -Nc https://gitlab.com/lyr3/dots/-/archive/master/dots-master.zip -O ~/Downloads/dots.zip")
+  (start-process-shell-command "rm -f ~/Downloads/dots.zip; \ wget -Nc https://gitlab.com/lyr3/dots/-/archive/master/dots-master.zip -O ~/Downloads/dots.zip" nil "rm -f ~/Downloads/dots.zip; wget -Nc https://gitlab.com/lyr3/dots/-/archive/master/dots-master.zip -O ~/Downloads/dots.zip")
   (start-process-shell-command "firefox https://account.box.com/login" nil "firefox https://account.box.com/login"))
 
 (defun hrs/find-file-as-sudo ()
